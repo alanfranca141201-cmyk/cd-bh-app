@@ -1,0 +1,1665 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Análise MKT CD BH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#302F2B;
+    --ink-2:#4C4D48;
+    --paper:#F7F5F0;
+    --card:#FFFFFF;
+    --signal:#A9C348;
+    --signal-press:#8CA93E;
+    --signal-text:#5F7A2C;
+    --success:#1F8A55;
+    --success-bg:#E7F4EC;
+    --slate:#5B6570;
+    --line:#E4E0D6;
+    --danger:#C1361B;
+    --radius:14px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    overscroll-behavior-y:contain;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--signal);outline-offset:2px;}
+
+  #app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;background:var(--paper);}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:var(--ink);
+    color:var(--paper);
+    padding:18px 20px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;top:0;z-index:10;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1;}
+  .brand .word1{font-size:22px;font-weight:700;letter-spacing:-0.02em;}
+  .brand .word2{font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--signal);}
+  .brand .tag{font-size:11px;color:#9BA3AB;margin-top:4px;letter-spacing:.04em;text-transform:uppercase;}
+  .badge{
+    background:rgba(169,195,72,0.20);
+    border:1px solid rgba(169,195,72,0.5);
+    color:#D7E6A8;
+    font-size:12px;font-weight:600;
+    padding:6px 10px;border-radius:999px;
+    white-space:nowrap;
+  }
+
+  main{flex:1;padding:18px 16px calc(150px + var(--safe-b));}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- Cards / sections ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .section-label{
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--slate);margin:0 0 10px 2px;
+  }
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px;}
+  .field .hint{font-size:12px;color:var(--slate);margin-top:5px;}
+  .field .error{font-size:12px;color:var(--danger);margin-top:5px;display:none;}
+  .field.has-error .error{display:block;}
+  .field.has-error input,.field.has-error select{border-color:var(--danger);}
+  .field.has-error .toggle-row,.field.has-error .toggle-col{outline:1.5px solid var(--danger);outline-offset:4px;border-radius:12px;}
+
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%;
+    font-size:16px;
+    font-family:inherit;
+    padding:12px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  textarea{resize:vertical;min-height:110px;font-family:'IBM Plex Mono',monospace;font-size:13px;}
+  textarea:focus{border-color:var(--signal);}
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%235B6570' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    padding-right:34px;
+  }
+  input:focus,select:focus{border-color:var(--signal);}
+
+  .money-wrap{position:relative;}
+  .money-wrap .prefix{
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    color:var(--slate);font-weight:600;font-family:'IBM Plex Mono',monospace;
+    pointer-events:none;
+  }
+  .money-wrap input{padding-left:34px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+  .toggle-row{display:flex;gap:8px;}
+  .toggle-btn{
+    flex:1;padding:12px 10px;border-radius:10px;border:1.5px solid var(--line);
+    background:var(--paper);color:var(--ink-2);font-weight:600;font-size:14px;cursor:pointer;
+  }
+  .toggle-btn.selected{
+    background:var(--ink);border-color:var(--ink);color:#fff;
+  }
+  .potencial-btn[data-cor="verde"].selected{background:#2E9E4F;border-color:#2E9E4F;color:#fff;}
+  .potencial-btn[data-cor="amarelo"].selected{background:#E3A712;border-color:#E3A712;color:#2B2000;}
+  .potencial-btn[data-cor="vermelho"].selected{background:var(--danger);border-color:var(--danger);color:#fff;}
+  .toggle-col{display:flex;flex-direction:column;gap:8px;}
+  .toggle-col .toggle-btn{width:100%;text-align:left;}
+
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  /* ---------- Submit bar ---------- */
+  .bottom-dock{
+    position:fixed;left:0;right:0;bottom:0;
+    max-width:520px;margin:0 auto;z-index:20;
+  }
+  .submit-bar{
+    background:linear-gradient(to top, var(--paper) 75%, rgba(247,245,240,0));
+    padding:14px 16px 10px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .submit-bar .btn-row{display:flex;gap:10px;}
+  .btn-primary{
+    flex:1;
+    background:var(--signal);color:var(--ink);border:none;
+    font-size:16px;font-weight:700;letter-spacing:.01em;
+    padding:16px 18px;border-radius:12px;cursor:pointer;
+    box-shadow:0 8px 20px rgba(169,195,72,0.4);
+  }
+  .btn-primary:active{background:var(--signal-press);}
+  .btn-primary:disabled{opacity:.6;box-shadow:none;}
+
+  /* ---------- Tab bar ---------- */
+  .tabbar-fixed{
+    background:var(--card);border-top:1px solid var(--line);
+    display:flex;padding-bottom:calc(6px + var(--safe-b));
+  }
+  .tabbar-fixed button{
+    flex:1;background:none;border:none;padding:12px 6px 10px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    color:var(--slate);font-size:12px;font-weight:600;
+  }
+  .tabbar-fixed button .dot{width:6px;height:6px;border-radius:999px;background:transparent;}
+  .tabbar-fixed button.active{color:var(--ink);}
+  .tabbar-fixed button.active .dot{background:var(--signal);}
+
+  /* ---------- Dashboard ---------- */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .stat-card{background:var(--ink);color:var(--paper);border-radius:var(--radius);padding:14px 14px;}
+  .stat-card .label{font-size:11px;color:#9BA3AB;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  .stat-card .value{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;margin-top:6px;}
+  .stat-card.wide{grid-column:1 / -1;background:var(--card);color:var(--ink);border:1px solid var(--line);}
+  .stat-card.wide .label{color:var(--slate);}
+  .stat-card.wide .value{color:var(--ink);font-size:26px;}
+
+  .rank-item{margin-bottom:10px;}
+  .rank-item:last-child{margin-bottom:0;}
+  .rank-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .rank-top .name{font-weight:600;color:var(--ink-2);}
+  .rank-top .val{font-family:'IBM Plex Mono',monospace;color:var(--slate);}
+  .rank-bar{height:8px;border-radius:999px;background:var(--paper);border:1px solid var(--line);overflow:hidden;}
+  .rank-bar > div{height:100%;background:var(--signal);border-radius:999px;}
+
+  .period-filter{
+    display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .period-filter::-webkit-scrollbar{display:none;}
+  .period-btn{
+    flex:0 0 auto;padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--ink-2);font-size:13px;font-weight:600;
+    font-family:inherit;cursor:pointer;white-space:nowrap;
+  }
+  .period-btn.selected{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  .chart-wrap svg{display:block;width:100%;height:auto;}
+  #chart-trend{margin-bottom:0;}
+
+  .champion{
+    display:flex;align-items:center;gap:10px;
+    background:var(--success-bg);border:1px solid #BFE3CC;color:var(--success);
+    border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin-top:12px;
+  }
+  .champion .k{color:#3E7A56;font-weight:500;}
+
+  .recent-item{
+    cursor:pointer;transition:background .12s ease;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--line);
+  }
+  .recent-item:active{background:var(--paper);}
+  .recent-item:last-child{border-bottom:none;}
+  .recent-item .who{font-weight:600;font-size:13px;}
+  .recent-item .meta{font-size:12px;color:var(--slate);margin-top:2px;}
+  .recent-item .amt{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;}
+
+  .empty-state{text-align:center;padding:30px 10px;color:var(--slate);font-size:13px;}
+  .empty-state .big{font-size:15px;color:var(--ink-2);font-weight:600;margin-bottom:4px;}
+
+  .refresh-link{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:600;color:var(--signal-text);
+    background:none;border:none;cursor:pointer;padding:0;
+  }
+
+  /* ---------- Confirmation stamp ---------- */
+  #confirm-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  #confirm-overlay.show{opacity:1;pointer-events:auto;}
+  .stamp{
+    border:4px solid var(--signal);color:var(--signal);
+    border-radius:16px;padding:26px 30px;text-align:center;
+    transform:scale(.8) rotate(-6deg);opacity:0;
+    transition:transform .28s cubic-bezier(.2,1.4,.4,1), opacity .2s ease;
+  }
+  #confirm-overlay.show .stamp{transform:scale(1) rotate(-6deg);opacity:1;}
+  .stamp .t1{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;letter-spacing:.03em;}
+  .stamp .t2{font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;color:#D7E6A8;}
+  .stamp .t3{font-family:'Inter',sans-serif;font-size:11px;margin-top:10px;color:#B9C79A;font-weight:600;line-height:1.5;}
+  .stamp.fail{border-color:var(--danger);color:var(--danger);}
+  .stamp.fail .t2{color:#F0BBAE;}
+  .stamp.fail .t3{color:#F0BBAE;}
+  @media (prefers-reduced-motion: reduce){
+    .stamp{transition:none;transform:none;opacity:1;}
+    #confirm-overlay{transition:none;}
+  }
+
+  #review-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:45;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #review-overlay.show{opacity:1;pointer-events:auto;}
+  #sale-detail-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:46;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #sale-detail-overlay.show{opacity:1;pointer-events:auto;}
+  #vendor-detail-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:45;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #vendor-detail-overlay.show{opacity:1;pointer-events:auto;}
+  #segmento-detail-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:45;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #segmento-detail-overlay.show{opacity:1;pointer-events:auto;}
+  .review-card{width:100%;max-width:440px;max-height:82vh;overflow-y:auto;margin-bottom:0;}
+  .review-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .review-row:last-child{border-bottom:none;}
+  .review-row .k{color:var(--slate);font-weight:600;}
+  .review-row .v{color:var(--ink);font-weight:600;text-align:right;}
+
+  .note-banner{
+    font-size:12px;color:var(--slate);background:#EFEBE0;border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.5;
+  }
+
+  .alert-banner{
+    font-size:12px;font-weight:600;line-height:1.5;
+    border-radius:10px;padding:10px 12px;margin-bottom:10px;
+  }
+  .alert-warning{background:#FDF1DC;border:1px solid #F0D28C;color:#8A5A12;}
+  .alert-info{background:#E7EEF6;border:1px solid #BFD3EA;color:#2C4A66;}
+
+  /* ---------- PIN gate ---------- */
+  .pin-gate{text-align:center;padding:56px 22px 20px;}
+  .pin-gate .pin-icon{font-size:34px;margin-bottom:10px;}
+  .pin-gate h3{margin:0 0 6px;font-size:18px;}
+  .pin-gate .hint{font-size:13px;color:var(--slate);margin:0 0 20px;}
+  .pin-gate input[type=password]{
+    width:100%;text-align:center;letter-spacing:.04em;
+    font-size:16px;font-family:'IBM Plex Mono',monospace;
+    padding:13px 12px;border-radius:10px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--ink);margin-bottom:10px;
+  }
+  .pin-gate input[type=password]:focus{border-color:var(--signal);}
+  .pin-gate .error{display:none;font-size:12px;color:var(--danger);margin-bottom:10px;}
+  .pin-gate .error.show{display:block;}
+  .btn-unlock{
+    width:100%;background:var(--signal);color:var(--ink);border:none;
+    font-size:15px;font-weight:700;padding:13px 18px;border-radius:12px;cursor:pointer;
+  }
+  .btn-unlock:active{background:var(--signal-press);}
+
+  /* ---------- Desktop-only elements (hidden by default on mobile) ---------- */
+  .sidebar-brand{display:none;}
+  .btn-desktop-submit{display:none;}
+  .dash-grid{display:block;}
+
+  /* ================================================================
+     Versão desktop — tela cheia com barra lateral fixa
+     ================================================================ */
+  @media (min-width: 900px){
+    #app{
+      max-width:none;
+      flex-direction:row;
+      align-items:stretch;
+    }
+    .topbar{display:none;} /* a marca passa a ficar no topo da barra lateral */
+
+    .bottom-dock{
+      position:fixed;left:0;top:0;bottom:0;right:auto;
+      width:248px;max-width:none;margin:0;
+      background:var(--ink);
+      display:flex;flex-direction:column;
+      padding:22px 0 20px;
+      overflow-y:auto;
+    }
+    .sidebar-brand{
+      display:block;color:var(--paper);padding:0 22px 22px;margin-bottom:8px;
+      border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-brand .word1,.sidebar-brand .word2{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;letter-spacing:-0.02em;}
+    .sidebar-brand .word2{color:var(--signal);}
+    .sidebar-brand .tag{font-size:10px;color:#9BA3AB;margin-top:5px;letter-spacing:.04em;text-transform:uppercase;}
+
+    .submit-bar{display:none !important;} /* no desktop o botão fica embutido no fim do formulário — !important necessário pois o JS de troca de aba define display inline */
+
+    .tabbar-fixed{
+      background:none;border-top:none;padding-bottom:0;
+      flex-direction:column;align-items:stretch;gap:2px;padding:0 12px;
+    }
+    .tabbar-fixed button{
+      flex-direction:row;justify-content:flex-start;gap:10px;
+      padding:11px 12px;border-radius:10px;color:#9BA3AB;font-size:13px;
+    }
+    .tabbar-fixed button:hover{background:rgba(255,255,255,0.06);}
+    .tabbar-fixed button.active{background:rgba(169,195,72,0.16);color:#fff;}
+    .tabbar-fixed button .dot{width:7px;height:7px;}
+
+    main{
+      margin-left:248px;
+      padding:36px 40px 60px;
+      max-width:none;
+    }
+    #view-form{max-width:640px;margin:0 auto;}
+    #view-dashboard #dash-content{max-width:1120px;margin:0 auto;}
+    #view-dashboard #pin-gate{max-width:420px;margin:40px auto 0;}
+    #view-dashboard #dash-loading{max-width:420px;margin:40px auto 0;}
+
+    .btn-desktop-submit{
+      display:block;width:100%;margin-top:6px;box-shadow:0 8px 20px rgba(169,195,72,0.3);
+    }
+
+    .dash-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:16px;
+      align-items:start;
+    }
+    .dash-grid .card{margin-bottom:0;}
+
+    #view-dashboard .stat-grid{grid-template-columns:1fr 1fr 1fr;}
+    #view-dashboard .stat-grid .stat-card.wide{grid-column:auto;}
+  }
+</style>
+
+</head>
+<body>
+<div id="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div><span class="word1">Análise MKT</span> <span class="word2">CD BH</span></div>
+      <div class="tag">Registro comercial de campo</div>
+    </div>
+  </div>
+
+  <main>
+    <!-- ===================== FORM VIEW ===================== -->
+    <section id="view-form" class="view active">
+
+      <div class="card">
+        <div class="section-label">Quem e quando</div>
+        <div class="row-2">
+          <div class="field" id="f-vendedor">
+            <label for="vendedor">Vendedor</label>
+            <select id="vendedor"></select>
+            <div class="error">Selecione o vendedor.</div>
+          </div>
+          <div class="field" id="f-data">
+            <label for="data">Data</label>
+            <input type="date" id="data">
+            <div class="error">Informe a data da venda.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Cliente</div>
+        <div class="field" id="f-telefone">
+          <label for="telefone">Telefone do cliente</label>
+          <input type="tel" id="telefone" placeholder="(00) 00000-0000" autocomplete="off" inputmode="tel">
+        </div>
+        <div class="field" id="f-cidade">
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" list="cidades-datalist" placeholder="Digite ou escolha a cidade" autocomplete="off">
+          <datalist id="cidades-datalist"></datalist>
+          <div class="error">Informe a cidade.</div>
+        </div>
+        <div class="field" id="f-estado">
+          <label for="estado">Estado</label>
+          <select id="estado"></select>
+          <div class="error">Selecione o estado.</div>
+        </div>
+        <div class="field" id="f-segmento">
+          <label for="segmento">Segmento do cliente</label>
+          <select id="segmento"></select>
+          <div class="error">Selecione o segmento do cliente.</div>
+        </div>
+        <div class="field" id="f-origem">
+          <label for="origem">Origem do cliente</label>
+          <select id="origem"></select>
+          <div class="error">Selecione a origem do cliente.</div>
+        </div>
+        <div class="field" id="f-tipo">
+          <label>Cliente novo ou recorrente</label>
+          <div class="toggle-row" id="toggle-tipo">
+            <button type="button" class="toggle-btn" data-val="Novo">Novo</button>
+            <button type="button" class="toggle-btn" data-val="Recorrente">Recorrente</button>
+          </div>
+          <div class="error">Selecione se o cliente é novo ou recorrente.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Produto</div>
+        <div class="field" id="f-produto">
+          <label for="produto">Produto principal de interesse</label>
+          <select id="produto"></select>
+          <div class="error">Selecione o produto de interesse.</div>
+        </div>
+        <div class="field" id="f-valor">
+          <label for="valor">Valor estimado da venda</label>
+          <select id="valor"></select>
+          <div class="error">Selecione o valor estimado da venda.</div>
+        </div>
+        <div class="field" id="f-potencial">
+          <label>Potencial do cliente</label>
+          <div class="toggle-row" id="toggle-potencial">
+            <button type="button" class="toggle-btn potencial-btn" data-val="Pequeno" data-cor="verde">Pequeno</button>
+            <button type="button" class="toggle-btn potencial-btn" data-val="Médio" data-cor="amarelo">Médio</button>
+            <button type="button" class="toggle-btn potencial-btn" data-val="Grande" data-cor="vermelho">Grande</button>
+          </div>
+          <div class="error">Selecione o potencial do cliente.</div>
+        </div>
+      </div>
+
+      <div class="note-banner">Ao enviar, o registro vai direto para a planilha em tempo real. Se a conexão falhar, ele NÃO é salvo — você verá um aviso claro e poderá tentar novamente.</div>
+
+      <button type="button" class="btn-primary btn-desktop-submit" id="btn-submit-desktop">Registrar</button>
+    </section>
+
+    <!-- ===================== DASHBOARD VIEW ===================== -->
+    <section id="view-dashboard" class="view">
+      <div id="pin-gate" class="pin-gate">
+        <div class="pin-icon">🔒</div>
+        <h3>Painel protegido</h3>
+        <p class="hint">Digite o PIN de acesso para ver os resultados.</p>
+        <input type="password" id="pin-input" autocomplete="off" placeholder="PIN de acesso">
+        <div class="error" id="pin-error">PIN incorreto. Tente novamente.</div>
+        <button type="button" class="btn-unlock" id="btn-unlock">Entrar</button>
+      </div>
+      <div id="dash-loading" class="empty-state" style="display:none;">Carregando painel…</div>
+      <div id="dash-content" style="display:none;">
+
+        <div class="period-filter" id="period-filter">
+          <button type="button" class="period-btn" data-periodo="hoje">Hoje</button>
+          <button type="button" class="period-btn" data-periodo="semana">Esta semana</button>
+          <button type="button" class="period-btn selected" data-periodo="mes">Este mês</button>
+          <button type="button" class="period-btn" data-periodo="6meses">6 meses</button>
+          <button type="button" class="period-btn" data-periodo="1ano">1 ano</button>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card wide">
+            <div class="label">Total de registros</div>
+            <div class="value mono" id="stat-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Clientes novos</div>
+            <div class="value" id="stat-novos">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Recorrentes</div>
+            <div class="value" id="stat-recorrentes">0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Registros ao longo do tempo</div>
+          <div id="chart-trend"></div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="section-label">Registros por vendedor</div>
+            <div id="rank-vendedor"></div>
+            <div class="champion" id="champ-vendedor" style="display:none;"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Clientes novos x recorrentes</div>
+            <div id="rank-tipo"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por segmento</div>
+            <div id="rank-segmento"></div>
+            <div class="champion" id="champ-segmento" style="display:none;"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por origem</div>
+            <div id="rank-origem"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por produto de interesse</div>
+            <div id="rank-produto"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por valor estimado</div>
+            <div id="rank-valor"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por potencial do cliente</div>
+            <div id="rank-potencial"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por cidade</div>
+            <div id="rank-cidade"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Registros por estado</div>
+            <div id="rank-estado"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Últimos registros</div>
+          <div id="recent-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Backup dos dados</div>
+          <div class="alert-banner alert-warning" id="alert-capacity" style="display:none;"></div>
+          <div class="alert-banner alert-info" id="alert-weekly" style="display:none;">📅 Hoje é domingo — hora de fazer a exportação semanal dos dados.</div>
+          <div class="field" style="margin-bottom:10px;">
+            <div class="hint" style="margin-top:0;">Exporte semanalmente para não correr risco de perder o histórico de registros.</div>
+          </div>
+          <button class="btn-unlock" id="btn-export" type="button">⬇ Exportar dados (CSV)</button>
+          <div class="hint" id="export-count" style="text-align:center;margin-top:8px;"></div>
+        </div>
+
+        <div style="text-align:center;margin-top:6px;">
+          <button class="refresh-link" id="btn-refresh">↻ Atualizar painel</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="bottom-dock">
+    <div class="sidebar-brand">
+      <div><span class="word1">Análise MKT</span> <span class="word2">CD BH</span></div>
+      <div class="tag">Registro comercial de campo</div>
+    </div>
+
+    <div class="submit-bar" id="submit-bar">
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-submit">Registrar</button>
+      </div>
+    </div>
+
+    <nav class="tabbar-fixed" id="tabbar">
+      <button data-view="form" class="active">
+        <span class="dot"></span> Nova venda
+      </button>
+      <button data-view="dashboard">
+        <span class="dot"></span> Painel
+      </button>
+    </nav>
+  </div>
+
+  <div id="confirm-overlay">
+    <div class="stamp" id="stamp-box">
+      <div class="t1" id="stamp-title">REGISTRADO</div>
+      <div class="t2" id="stamp-detail">—</div>
+      <div class="t3" id="stamp-note" style="display:none;"></div>
+      <button type="button" class="btn-primary" id="btn-stamp-ok" style="display:none;margin-top:16px;box-shadow:none;">Entendi</button>
+    </div>
+  </div>
+
+  <div id="review-overlay">
+    <div class="card review-card">
+      <div class="section-label">Confira antes de enviar</div>
+      <div id="review-list"></div>
+      <div class="btn-row">
+        <button type="button" class="toggle-btn" id="btn-review-back">Voltar e editar</button>
+        <button type="button" class="btn-primary" id="btn-review-send" style="box-shadow:none;">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sale-detail-overlay">
+    <div class="card review-card">
+      <div class="section-label">Detalhes da venda</div>
+      <div id="sale-detail-list"></div>
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="btn-sale-detail-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vendor-detail-overlay">
+    <div class="card review-card">
+      <div class="section-label" id="vd-name">Vendedor</div>
+
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-card wide">
+          <div class="label">Total de registros</div>
+          <div class="value" id="vd-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Novos</div>
+          <div class="value" id="vd-novos">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Recorrentes</div>
+          <div class="value" id="vd-recorrentes">0</div>
+        </div>
+      </div>
+
+      <div class="section-label">Registros deste vendedor</div>
+      <div id="vd-lista-vendas" style="margin-bottom:16px;"></div>
+
+      <div class="section-label">Segmento</div>
+      <div id="vd-rank-segmento"></div>
+
+      <div class="section-label" style="margin-top:14px;">Origem</div>
+      <div id="vd-rank-origem"></div>
+
+      <div class="section-label" style="margin-top:14px;">Produto de interesse</div>
+      <div id="vd-rank-produto"></div>
+
+      <div class="section-label" style="margin-top:14px;">Valor estimado</div>
+      <div id="vd-rank-valor"></div>
+
+      <div class="section-label" style="margin-top:14px;">Potencial do cliente</div>
+      <div id="vd-rank-potencial"></div>
+
+      <div class="section-label" style="margin-top:14px;">Cidade</div>
+      <div id="vd-rank-cidade"></div>
+
+      <div class="section-label" style="margin-top:14px;">Estado</div>
+      <div id="vd-rank-estado"></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button type="button" class="toggle-btn" id="btn-vendor-export-txt">⬇ Resumo (texto)</button>
+        <button type="button" class="toggle-btn" id="btn-vendor-export-csv">⬇ Registros (CSV)</button>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button type="button" class="btn-primary" id="btn-vendor-detail-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="segmento-detail-overlay">
+    <div class="card review-card">
+      <div class="section-label" id="sd-name">Segmento</div>
+
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-card wide">
+          <div class="label">Total de registros</div>
+          <div class="value" id="sd-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Novos</div>
+          <div class="value" id="sd-novos">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Recorrentes</div>
+          <div class="value" id="sd-recorrentes">0</div>
+        </div>
+      </div>
+
+      <div class="section-label">Registros deste segmento</div>
+      <div id="sd-lista-vendas" style="margin-bottom:16px;"></div>
+
+      <div class="section-label">Vendedor</div>
+      <div id="sd-rank-vendedor"></div>
+
+      <div class="section-label" style="margin-top:14px;">Origem</div>
+      <div id="sd-rank-origem"></div>
+
+      <div class="section-label" style="margin-top:14px;">Produto de interesse</div>
+      <div id="sd-rank-produto"></div>
+
+      <div class="section-label" style="margin-top:14px;">Valor estimado</div>
+      <div id="sd-rank-valor"></div>
+
+      <div class="section-label" style="margin-top:14px;">Potencial do cliente</div>
+      <div id="sd-rank-potencial"></div>
+
+      <div class="section-label" style="margin-top:14px;">Cidade</div>
+      <div id="sd-rank-cidade"></div>
+
+      <div class="section-label" style="margin-top:14px;">Estado</div>
+      <div id="sd-rank-estado"></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button type="button" class="btn-primary" id="btn-segmento-detail-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------- Reference lists (mirrors the spreadsheet's "Listas" tab) ----------------
+  const VENDEDORES = ["Leonardo", "Vendedor 2", "Vendedor 3", "Vendedor 4"];
+  const ESTADOS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+  const SEGMENTOS = ["Condomínio","Indústrias","Distribuidor","Bar/Restaurante","Igreja","Empresa","Consumidor final","Locador","Hospital","Prefeitura","Construtora","Outro"];
+  const ORIGENS = ["Celular Google","Celular Meta","Indicação","Prospecção individual","E-mail","Cliente recorrente","Outro"];
+  const PRODUTOS = ["Móvel de plástico tradicional","Móvel de plástico Premium","Linha de madeira","Linha industrial"];
+  const VALORES = ["Até R$ 500","R$ 500 a R$ 2 mil","R$ 2 mil a R$ 5 mil","R$ 5 mil a R$ 10 mil","Mais de R$ 10 mil"];
+  const POTENCIAIS = ["Pequeno","Médio","Grande"];
+  const CIDADES = ["Uberlândia","Contagem","Juiz de Fora","Montes Claros","Betim","Uberaba","Ribeirão das Neves","Governador Valadares","Belo Horizonte","Brumadinho","Caeté","Capim Branco","Confins","Esmeraldas","Florestal","Ibirité","Igarapé","Itaguara","Itatiaiuçu","Jaboticatubas","Juatuba","Lagoa Santa","Mário Campos","Mateus Leme","Matozinhos","Nova Lima","Nova União","Pedro Leopoldo","Raposos","Rio Acima","Rio Manso","Sabará","Santa Luzia","São Joaquim de Bicas","São José da Lapa","Sarzedo","Taquaraçu de Minas","Vespasiano"];
+
+  function fillSelect(sel, options, placeholder){
+    sel.innerHTML = "";
+    if(placeholder){
+      const o = document.createElement("option");
+      o.value = ""; o.textContent = placeholder; o.disabled = true; o.selected = true;
+      sel.appendChild(o);
+    }
+    options.forEach(opt=>{
+      const o = document.createElement("option");
+      o.value = opt; o.textContent = opt;
+      sel.appendChild(o);
+    });
+  }
+
+  const $ = id => document.getElementById(id);
+
+  function escapeHtml(str){
+    return String(str==null ? "" : str).replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+  }
+
+  fillSelect($("vendedor"), VENDEDORES, "Selecione o vendedor");
+  fillSelect($("estado"), ESTADOS, "Selecione");
+  fillSelect($("segmento"), SEGMENTOS, "Selecione o segmento");
+  fillSelect($("origem"), ORIGENS, "Selecione a origem");
+  fillSelect($("produto"), PRODUTOS, "Selecione o produto");
+  fillSelect($("valor"), VALORES, "Selecione o valor estimado");
+  (function preencherCidades(){
+    const datalist = $("cidades-datalist");
+    CIDADES.forEach(c=>{
+      const opt = document.createElement("option");
+      opt.value = c;
+      datalist.appendChild(opt);
+    });
+  })();
+
+  // default date = today, in local time
+  (function setToday(){
+    const d = new Date();
+    const iso = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    $("data").value = iso;
+  })();
+
+  const fmtBRL = n => "R$ " + Number(n||0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmtBRLShort = n => "R$ " + Number(n||0).toLocaleString("pt-BR", {maximumFractionDigits:0});
+
+  // ---------------- Filtro de período do painel ----------------
+  let periodoSelecionado = "mes";
+
+  function inicioDoPeriodo(periodo){
+    const agora = new Date();
+    const hoje0h = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+    if(periodo === "hoje") return hoje0h;
+    if(periodo === "semana"){
+      const diaSemana = (hoje0h.getDay() + 6) % 7; // 0 = segunda
+      const inicio = new Date(hoje0h);
+      inicio.setDate(inicio.getDate() - diaSemana);
+      return inicio;
+    }
+    if(periodo === "mes") return new Date(agora.getFullYear(), agora.getMonth(), 1);
+    if(periodo === "6meses"){
+      const d = new Date(hoje0h);
+      d.setMonth(d.getMonth() - 6);
+      return d;
+    }
+    if(periodo === "1ano"){
+      const d = new Date(hoje0h);
+      d.setFullYear(d.getFullYear() - 1);
+      return d;
+    }
+    return new Date(0);
+  }
+
+  function filtrarPorPeriodo(entries, periodo){
+    const inicio = inicioDoPeriodo(periodo).getTime();
+    return entries.filter(e => e.ts >= inicio);
+  }
+
+  // ---------------- Gráficos (SVG simples, sem dependências) ----------------
+  const MESES_ABREV = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  function computeTrendBuckets(entries, periodo){
+    const inicio = inicioDoPeriodo(periodo);
+    const fim = new Date();
+    const spanDias = Math.max(0.1, (fim - inicio) / 86400000);
+    let granularidade;
+    if(spanDias <= 1.5) granularidade = "hora";
+    else if(spanDias <= 14) granularidade = "dia";
+    else if(spanDias <= 90) granularidade = "semana";
+    else granularidade = "mes";
+
+    function chave(d){
+      if(granularidade === "hora") return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate()+"-"+d.getHours();
+      if(granularidade === "dia") return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
+      if(granularidade === "semana"){
+        const diaSemana = (d.getDay()+6)%7;
+        const seg = new Date(d.getFullYear(), d.getMonth(), d.getDate()-diaSemana);
+        return "s"+seg.getFullYear()+"-"+seg.getMonth()+"-"+seg.getDate();
+      }
+      return d.getFullYear()+"-"+d.getMonth();
+    }
+    function rotulo(d){
+      if(granularidade === "hora") return d.getHours()+"h";
+      if(granularidade === "dia") return d.getDate()+"/"+(d.getMonth()+1);
+      if(granularidade === "semana") return d.getDate()+"/"+(d.getMonth()+1);
+      return MESES_ABREV[d.getMonth()];
+    }
+
+    const buckets = {};
+    entries.forEach(e=>{
+      const d = new Date(e.ts);
+      const k = chave(d);
+      if(!buckets[k]) buckets[k] = { label: rotulo(d), sortTs: d.getTime(), total: 0 };
+      buckets[k].total += 1;
+    });
+    return Object.values(buckets).sort((a,b)=>a.sortTs-b.sortTs);
+  }
+
+  function renderTrendChart(container, buckets){
+    if(buckets.length === 0){
+      container.innerHTML = '<div class="empty-state" style="padding:14px 0;">Sem registros neste período.</div>';
+      return;
+    }
+    const w = 320, h = 130, padBottom = 18;
+    const maxVal = Math.max(1, ...buckets.map(b=>b.total));
+    const slot = w / buckets.length;
+    const barWidth = Math.max(2, slot - 4);
+    let bars = "";
+    buckets.forEach((b,i)=>{
+      const barH = Math.max(2, (b.total/maxVal) * (h - padBottom - 6));
+      const x = i*slot + (slot-barWidth)/2;
+      const y = (h - padBottom) - barH;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" style="fill:var(--signal)"><title>${escapeHtml(b.label)}: ${b.total} registro${b.total===1?'':'s'}</title></rect>`;
+    });
+    let labels = "";
+    if(buckets.length <= 14){
+      buckets.forEach((b,i)=>{
+        const x = i*slot + slot/2;
+        labels += `<text x="${x.toFixed(1)}" y="${h-4}" font-size="8" text-anchor="middle" style="fill:var(--slate)">${escapeHtml(b.label)}</text>`;
+      });
+    }
+    container.innerHTML = `<div class="chart-wrap"><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="height:120px;">${bars}${labels}</svg></div>`;
+  }
+
+  // ---------------- Formatação de data ----------------
+  function fmtDataBR(iso){
+    const partes = String(iso||"").split("-");
+    return partes.length === 3 ? (partes[2] + "/" + partes[1] + "/" + partes[0]) : (iso || "");
+  }
+
+  // ---------------- Tipo toggle ----------------
+  let tipoSelecionado = null;
+  document.querySelectorAll("#toggle-tipo .toggle-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#toggle-tipo .toggle-btn").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      tipoSelecionado = btn.dataset.val;
+      $("f-tipo") && $("f-tipo").classList.remove("has-error");
+      if(tipoSelecionado === "Recorrente"){
+        $("origem").value = "Cliente recorrente";
+        $("f-origem") && $("f-origem").classList.remove("has-error");
+      }
+    });
+  });
+
+  // ---------------- Telefone: máscara simples ----------------
+  $("telefone").addEventListener("input", (e)=>{
+    let v = e.target.value.replace(/\D/g,"").slice(0,11);
+    if(v.length > 6){
+      v = v.replace(/(\d{2})(\d{4,5})(\d{0,4})/, "($1) $2-$3");
+    } else if(v.length > 2){
+      v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+    } else if(v.length > 0){
+      v = v.replace(/(\d{0,2})/, "($1");
+    }
+    e.target.value = v.trim();
+  });
+
+  // ---------------- Potencial toggle ----------------
+  let potencialSelecionado = null;
+  document.querySelectorAll("#toggle-potencial .toggle-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#toggle-potencial .toggle-btn").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      potencialSelecionado = btn.dataset.val;
+      $("f-potencial") && $("f-potencial").classList.remove("has-error");
+    });
+  });
+
+  // ---------------- Dashboard access PIN ----------------
+  const DASHBOARD_PIN = "Alan080878141201*MCZ";
+  let unlocked = false;
+  let pinAttempts = 0;
+  let lockedUntil = 0;
+
+  function tryUnlock(){
+    if(Date.now() < lockedUntil){
+      const secs = Math.ceil((lockedUntil - Date.now())/1000);
+      $("pin-error").textContent = "Muitas tentativas. Aguarde " + secs + "s e tente de novo.";
+      $("pin-error").classList.add("show");
+      return;
+    }
+    const val = $("pin-input").value;
+    if(val === DASHBOARD_PIN){
+      unlocked = true;
+      pinAttempts = 0;
+      $("pin-input").value = "";
+      $("pin-error").classList.remove("show");
+      $("pin-gate").style.display = "none";
+      loadDashboard();
+    } else {
+      pinAttempts++;
+      if(pinAttempts >= 5){
+        lockedUntil = Date.now() + 30000;
+        pinAttempts = 0;
+        $("pin-error").textContent = "Muitas tentativas erradas. Aguarde 30s e tente de novo.";
+      } else {
+        $("pin-error").textContent = "PIN incorreto. Tente novamente.";
+      }
+      $("pin-error").classList.add("show");
+    }
+  }
+  $("btn-unlock").addEventListener("click", tryUnlock);
+  $("pin-input").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") tryUnlock();
+  });
+
+  // ---------------- View switching ----------------
+  let currentView = "form";
+  function switchView(name){
+    currentView = name;
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    $("view-" + name).classList.add("active");
+    document.querySelectorAll("#tabbar button").forEach(b=>b.classList.toggle("active", b.dataset.view === name));
+    $("submit-bar").style.display = name === "form" ? "flex" : "none";
+    if(name === "dashboard"){
+      if(unlocked){
+        $("pin-gate").style.display = "none";
+        loadDashboard();
+      } else {
+        $("pin-gate").style.display = "block";
+        $("dash-loading").style.display = "none";
+        $("dash-content").style.display = "none";
+      }
+    }
+  }
+  document.querySelectorAll("#tabbar button").forEach(b=>{
+    b.addEventListener("click", ()=>switchView(b.dataset.view));
+  });
+  $("btn-refresh").addEventListener("click", loadDashboard);
+
+  document.querySelectorAll("#period-filter .period-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(btn.classList.contains("selected")) return;
+      document.querySelectorAll("#period-filter .period-btn").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      periodoSelecionado = btn.dataset.periodo;
+      loadDashboard();
+    });
+  });
+
+  // ---------------- Google Sheets como banco de dados ----------------
+  // Cole aqui a URL do seu Apps Script (veja o guia de configuração).
+  // Enquanto não configurar, nenhuma venda é salva de verdade (o painel fica vazio).
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4PFCH7XzExUDKOl2m-BflP1SU4zE4fFJDcDZsmtxLAqSA3lL4RC41sC8nRV3ai76ncg/exec";
+
+  function isConfigured(){
+    return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("COLOQUE_AQUI");
+  }
+
+  function emptySummary(){
+    const bySeg = {}, byOri = {}, byProd = {}, byTipo = {Novo:0, Recorrente:0}, byValor = {}, byPot = {};
+    SEGMENTOS.forEach(s=>bySeg[s]=0);
+    ORIGENS.forEach(s=>byOri[s]=0);
+    PRODUTOS.forEach(s=>byProd[s]=0);
+    VALORES.forEach(s=>byValor[s]=0);
+    POTENCIAIS.forEach(s=>byPot[s]=0);
+    return {
+      totalCount:0,
+      segCount:{...bySeg},
+      oriCount:{...byOri},
+      prodCount:{...byProd},
+      tipoCount:{...byTipo},
+      valorCount:{...byValor},
+      potencialCount:{...byPot},
+      vendedorCount:{},
+      estadoCount:{},
+      cidadeCount:{}
+    };
+  }
+
+  function computeSummaryFromEntries(entries){
+    const summary = emptySummary();
+    entries.forEach(entry=>{
+      summary.totalCount += 1;
+      summary.segCount[entry.segmento] = (summary.segCount[entry.segmento]||0) + 1;
+      summary.oriCount[entry.origem] = (summary.oriCount[entry.origem]||0) + 1;
+      summary.prodCount[entry.produto] = (summary.prodCount[entry.produto]||0) + 1;
+      summary.tipoCount[entry.tipo] = (summary.tipoCount[entry.tipo]||0) + 1;
+      summary.valorCount[entry.valor] = (summary.valorCount[entry.valor]||0) + 1;
+      summary.potencialCount[entry.potencial] = (summary.potencialCount[entry.potencial]||0) + 1;
+      summary.vendedorCount[entry.vendedor] = (summary.vendedorCount[entry.vendedor]||0) + 1;
+      summary.estadoCount[entry.estado] = (summary.estadoCount[entry.estado]||0) + 1;
+      summary.cidadeCount[entry.cidade] = (summary.cidadeCount[entry.cidade]||0) + 1;
+    });
+    return summary;
+  }
+
+  // Busca todas as vendas já registradas na planilha (mais recente primeiro).
+  async function loadDB(){
+    if(!isConfigured()) return { summary: emptySummary(), entries: [] };
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + "?action=list");
+      const json = await res.json();
+      if(!json.ok) throw new Error(json.error || "resposta inválida");
+      const entries = (json.entries || []).map(r => {
+        const parsedTs = r["Registrado em"] ? new Date(r["Registrado em"]).getTime() : NaN;
+        return {
+          vendedor: r["Vendedor"] || "", data: r["Data"] || "", cidade: r["Cidade"] || "",
+          estado: r["Estado"] || "", tipo: r["Tipo"] || "", segmento: r["Segmento"] || "",
+          origem: r["Origem"] || "", produto: r["Produto"] || "",
+          valor: r["Valor"] || "", potencial: r["Potencial"] || "",
+          telefone: r["Telefone"] || "",
+          ts: isNaN(parsedTs) ? Date.now() : parsedTs
+        };
+      }).reverse(); // a planilha guarda em ordem de chegada; o app espera mais recente primeiro
+      return { summary: computeSummaryFromEntries(entries), entries };
+    }catch(e){
+      console.error("falha ao carregar da planilha", e);
+      return { summary: emptySummary(), entries: [] };
+    }
+  }
+
+  // Envia UMA venda para a planilha (cada venda vira uma linha nova, sem sobrescrever nada).
+  async function saveEntryRemote(entry, attempts){
+    if(!isConfigured()) return false;
+    attempts = attempts || 3;
+    for(let i=0;i<attempts;i++){
+      try{
+        const res = await fetch(APPS_SCRIPT_URL, { method:"POST", body:JSON.stringify(entry) });
+        const json = await res.json();
+        if(json.ok) return true;
+      }catch(e){ /* tenta de novo abaixo */ }
+      if(i < attempts-1) await new Promise(r=>setTimeout(r, 500*(i+1)));
+    }
+    return false;
+  }
+
+  // ---------------- Validation ----------------
+  function setError(fieldId, show){
+    const el = $(fieldId);
+    if(el) el.classList.toggle("has-error", !!show);
+  }
+
+  function validate(){
+    let ok = true;
+    const vendedor = $("vendedor").value.trim();
+    const cidade = $("cidade").value.trim();
+    const data = $("data").value;
+    const estado = $("estado").value;
+    const segmento = $("segmento").value;
+    const origem = $("origem").value;
+    const produto = $("produto").value;
+    const valor = $("valor").value;
+
+    setError("f-vendedor", !vendedor); if(!vendedor) ok = false;
+    setError("f-cidade", !cidade); if(!cidade) ok = false;
+    setError("f-data", !data); if(!data) ok = false;
+    setError("f-estado", !estado); if(!estado) ok = false;
+    setError("f-segmento", !segmento); if(!segmento) ok = false;
+    setError("f-origem", !origem); if(!origem) ok = false;
+    setError("f-produto", !produto); if(!produto) ok = false;
+    setError("f-valor", !valor); if(!valor) ok = false;
+    setError("f-tipo", !tipoSelecionado); if(!tipoSelecionado) ok = false;
+    setError("f-potencial", !potencialSelecionado); if(!potencialSelecionado) ok = false;
+
+    if(!ok){
+      const firstError = document.querySelector(".field.has-error");
+      if(firstError) firstError.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+
+    return ok;
+  }
+
+  // ---------------- Submit ----------------
+  let lastVendorName = "";
+  let currentEntry = null; // venda em revisão, ainda não enviada
+
+  function fmtCampo(entry){
+    return [
+      ["Vendedor", entry.vendedor],
+      ["Data", entry.data],
+      ["Telefone", entry.telefone || "—"],
+      ["Cidade", entry.cidade],
+      ["Cliente", entry.tipo],
+      ["Estado", entry.estado],
+      ["Segmento", entry.segmento],
+      ["Origem", entry.origem],
+      ["Produto", entry.produto],
+      ["Valor estimado", entry.valor],
+      ["Potencial", entry.potencial]
+    ];
+  }
+
+  function openReview(entry){
+    const list = $("review-list");
+    list.innerHTML = "";
+    fmtCampo(entry).forEach(([k,v])=>{
+      const row = document.createElement("div");
+      row.className = "review-row";
+      row.innerHTML = `<span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span>`;
+      list.appendChild(row);
+    });
+    $("btn-review-send").disabled = false;
+    $("btn-review-send").textContent = "Enviar";
+    $("review-overlay").classList.add("show");
+  }
+
+  function handleSubmitClick(){
+    if(!validate()){
+      const msg = "Preencha os campos obrigatórios";
+      $("btn-submit").textContent = msg;
+      $("btn-submit-desktop").textContent = msg;
+      setTimeout(()=>{
+        $("btn-submit").textContent = "Registrar";
+        $("btn-submit-desktop").textContent = "Registrar";
+      }, 1600);
+      return;
+    }
+    currentEntry = {
+      vendedor: $("vendedor").value.trim(),
+      data: $("data").value,
+      cidade: $("cidade").value.trim(),
+      estado: $("estado").value,
+      tipo: tipoSelecionado,
+      telefone: $("telefone").value.trim(),
+      segmento: $("segmento").value,
+      origem: $("origem").value,
+      produto: $("produto").value,
+      valor: $("valor").value,
+      potencial: potencialSelecionado,
+      ts: Date.now()
+    };
+    openReview(currentEntry);
+  }
+  $("btn-submit").addEventListener("click", handleSubmitClick);
+  $("btn-submit-desktop").addEventListener("click", handleSubmitClick);
+
+  $("btn-review-back").addEventListener("click", ()=>{
+    $("review-overlay").classList.remove("show");
+  });
+
+  function openSaleDetail(entry){
+    const list = $("sale-detail-list");
+    list.innerHTML = "";
+    const campos = fmtCampo(entry).concat([["Registrado em", new Date(entry.ts).toLocaleString("pt-BR")]]);
+    campos.forEach(([k,v])=>{
+      const row = document.createElement("div");
+      row.className = "review-row";
+      row.innerHTML = `<span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span>`;
+      list.appendChild(row);
+    });
+    $("sale-detail-overlay").classList.add("show");
+  }
+  $("btn-sale-detail-close").addEventListener("click", ()=>{
+    $("sale-detail-overlay").classList.remove("show");
+  });
+  $("sale-detail-overlay").addEventListener("click", (e)=>{
+    if(e.target.id === "sale-detail-overlay") $("sale-detail-overlay").classList.remove("show");
+  });
+
+  const PERIODO_LABEL = { hoje:"Hoje", semana:"Esta semana", mes:"Este mês", "6meses":"Últimos 6 meses", "1ano":"Último 1 ano" };
+
+  let vendorDetailNome = null;
+  let vendorDetailEntries = [];
+
+  function renderListaVendas(container, entries){
+    container.innerHTML = "";
+    if(entries.length === 0){
+      container.innerHTML = '<div class="empty-state" style="padding:10px 0;">Nenhum registro encontrado.</div>';
+      return;
+    }
+    entries.forEach(entry=>{
+      const row = document.createElement("div");
+      row.className = "recent-item";
+      row.innerHTML = `
+        <div>
+          <div class="who">${escapeHtml(entry.vendedor)} — ${escapeHtml(entry.cidade)}</div>
+          <div class="meta">${escapeHtml(fmtDataBR(entry.data))} · ${escapeHtml(entry.estado)}</div>
+        </div>
+        <div class="amt">${escapeHtml(entry.tipo)}</div>
+      `;
+      row.addEventListener("click", ()=> openSaleDetail(entry));
+      container.appendChild(row);
+    });
+  }
+
+  function openVendorDetail(nome, allEntries){
+    const entriesDoVendedor = allEntries.filter(e => e.vendedor === nome);
+    const s = computeSummaryFromEntries(entriesDoVendedor);
+    vendorDetailNome = nome;
+    vendorDetailEntries = entriesDoVendedor;
+
+    $("vd-name").textContent = nome;
+    $("vd-total").textContent = s.totalCount;
+    $("vd-novos").textContent = s.tipoCount["Novo"] || 0;
+    $("vd-recorrentes").textContent = s.tipoCount["Recorrente"] || 0;
+    renderListaVendas($("vd-lista-vendas"), entriesDoVendedor);
+
+    rankRows($("vd-rank-segmento"), s.segCount, null);
+    rankRows($("vd-rank-origem"), s.oriCount, null);
+    rankRows($("vd-rank-produto"), s.prodCount, null);
+    rankRows($("vd-rank-valor"), s.valorCount, null, {naturalOrder:true});
+    rankRows($("vd-rank-potencial"), s.potencialCount, null, {naturalOrder:true});
+    rankRows($("vd-rank-cidade"), s.cidadeCount, null, {limit:10});
+    rankRows($("vd-rank-estado"), s.estadoCount, null);
+
+    $("vendor-detail-overlay").classList.add("show");
+  }
+  $("btn-vendor-detail-close").addEventListener("click", ()=>{
+    $("vendor-detail-overlay").classList.remove("show");
+  });
+
+  function openSegmentoDetail(segmento, allEntries){
+    const entriesDoSegmento = allEntries.filter(e => e.segmento === segmento);
+    const s = computeSummaryFromEntries(entriesDoSegmento);
+
+    $("sd-name").textContent = segmento;
+    $("sd-total").textContent = s.totalCount;
+    $("sd-novos").textContent = s.tipoCount["Novo"] || 0;
+    $("sd-recorrentes").textContent = s.tipoCount["Recorrente"] || 0;
+    renderListaVendas($("sd-lista-vendas"), entriesDoSegmento);
+
+    rankRows($("sd-rank-vendedor"), s.vendedorCount, null);
+    rankRows($("sd-rank-origem"), s.oriCount, null);
+    rankRows($("sd-rank-produto"), s.prodCount, null);
+    rankRows($("sd-rank-valor"), s.valorCount, null, {naturalOrder:true});
+    rankRows($("sd-rank-potencial"), s.potencialCount, null, {naturalOrder:true});
+    rankRows($("sd-rank-cidade"), s.cidadeCount, null, {limit:10});
+    rankRows($("sd-rank-estado"), s.estadoCount, null);
+
+    $("segmento-detail-overlay").classList.add("show");
+  }
+  $("btn-segmento-detail-close").addEventListener("click", ()=>{
+    $("segmento-detail-overlay").classList.remove("show");
+  });
+  $("segmento-detail-overlay").addEventListener("click", (e)=>{
+    if(e.target.id === "segmento-detail-overlay") $("segmento-detail-overlay").classList.remove("show");
+  });
+
+  function formatarSecaoTexto(countMap, revenueMap, opts){
+    opts = opts || {};
+    const showRevenue = !!revenueMap;
+    let items = Object.keys(countMap).map(k => ({name:k, count: countMap[k]||0, revenue: (revenueMap?revenueMap[k]:0)||0}));
+    if(!opts.showAll) items = items.filter(it=>it.count>0);
+    if(!opts.naturalOrder) items = items.sort((a,b)=> showRevenue ? b.revenue-a.revenue : b.count-a.count);
+    if(items.length === 0) return "  (sem registros)";
+    return items.map(it=>{
+      const qtd = it.count + (it.count===1 ? " registro" : " registros");
+      const val = showRevenue ? (qtd + " · " + fmtBRL(it.revenue)) : qtd;
+      return "  " + it.name + ": " + val;
+    }).join("\n");
+  }
+
+  function buildVendorTextReport(nome, periodoLabel, s){
+    return [
+      "RELATÓRIO DE REGISTROS — " + nome,
+      "Período: " + periodoLabel,
+      "Gerado em: " + new Date().toLocaleString("pt-BR"),
+      "",
+      "RESUMO",
+      "Total de registros: " + s.totalCount,
+      "Novos: " + (s.tipoCount["Novo"] || 0),
+      "Recorrentes: " + (s.tipoCount["Recorrente"] || 0),
+      "",
+      "SEGMENTO",
+      formatarSecaoTexto(s.segCount),
+      "",
+      "ORIGEM",
+      formatarSecaoTexto(s.oriCount),
+      "",
+      "PRODUTO DE INTERESSE",
+      formatarSecaoTexto(s.prodCount),
+      "",
+      "VALOR ESTIMADO",
+      formatarSecaoTexto(s.valorCount, null, {naturalOrder:true}),
+      "",
+      "POTENCIAL DO CLIENTE",
+      formatarSecaoTexto(s.potencialCount, null, {naturalOrder:true}),
+      "",
+      "CIDADE",
+      formatarSecaoTexto(s.cidadeCount),
+      "",
+      "ESTADO",
+      formatarSecaoTexto(s.estadoCount),
+    ].join("\n");
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  $("btn-vendor-export-txt").addEventListener("click", ()=>{
+    if(!vendorDetailNome) return;
+    const s = computeSummaryFromEntries(vendorDetailEntries);
+    const periodoLabel = PERIODO_LABEL[periodoSelecionado] || periodoSelecionado;
+    const texto = buildVendorTextReport(vendorDetailNome, periodoLabel, s);
+    downloadText(texto, "relatorio-" + vendorDetailNome.replace(/\s+/g,"-") + "-" + todayIsoCompact() + ".txt");
+  });
+
+  $("btn-vendor-export-csv").addEventListener("click", ()=>{
+    if(!vendorDetailNome) return;
+    const entriesOrdenadas = vendorDetailEntries.slice().reverse();
+    downloadCSV(entriesToCSV(entriesOrdenadas), "registros-" + vendorDetailNome.replace(/\s+/g,"-") + "-" + todayIsoCompact() + ".csv");
+  });
+
+  $("vendor-detail-overlay").addEventListener("click", (e)=>{
+    if(e.target.id === "vendor-detail-overlay") $("vendor-detail-overlay").classList.remove("show");
+  });
+
+  $("btn-review-send").addEventListener("click", async ()=>{
+    if(!currentEntry) return;
+    const entry = currentEntry;
+    currentEntry = null;
+
+    $("btn-review-send").disabled = true;
+    $("btn-review-send").textContent = "Enviando...";
+
+    // tenta gravar na planilha (com tentativas automáticas)
+    const ok = await saveEntryRemote(entry);
+
+    $("review-overlay").classList.remove("show");
+    $("btn-review-send").disabled = false;
+    $("btn-review-send").textContent = "Enviar";
+
+    if(ok){
+      lastVendorName = entry.vendedor;
+      showSuccessStamp(entry);
+    } else {
+      showFailureStamp(entry);
+    }
+  });
+
+  function showSuccessStamp(entry){
+    const box = $("stamp-box");
+    box.classList.remove("fail");
+    $("stamp-title").textContent = "REGISTRADO";
+    $("stamp-detail").textContent = entry.cidade + " · " + entry.segmento;
+    $("stamp-note").style.display = "none";
+    $("btn-stamp-ok").style.display = "none";
+    const overlay = $("confirm-overlay");
+    overlay.classList.add("show");
+    setTimeout(()=>{
+      overlay.classList.remove("show");
+      resetForm();
+    }, 1300);
+  }
+
+  function showFailureStamp(entry){
+    const box = $("stamp-box");
+    box.classList.add("fail");
+    $("stamp-title").textContent = "⚠️ NÃO FOI SALVO";
+    $("stamp-detail").textContent = entry.cidade + " · " + entry.segmento;
+    $("stamp-note").textContent = "Sem conexão com a planilha. Os dados continuam preenchidos no formulário — toque em \"Registrar\" de novo assim que tiver sinal.";
+    $("stamp-note").style.display = "block";
+    $("btn-stamp-ok").style.display = "inline-block";
+    $("confirm-overlay").classList.add("show");
+    // NÃO reseta o formulário: os dados ficam preenchidos para nova tentativa manual
+  }
+  $("btn-stamp-ok").addEventListener("click", ()=>{
+    $("confirm-overlay").classList.remove("show");
+  });
+
+  function resetForm(){
+    $("cidade").value = "";
+    $("telefone").value = "";
+    $("estado").selectedIndex = 0;
+    $("segmento").selectedIndex = 0;
+    $("origem").selectedIndex = 0;
+    $("produto").selectedIndex = 0;
+    $("valor").selectedIndex = 0;
+    tipoSelecionado = null;
+    potencialSelecionado = null;
+    document.querySelectorAll("#toggle-tipo .toggle-btn").forEach(b=>b.classList.remove("selected"));
+    document.querySelectorAll("#toggle-potencial .toggle-btn").forEach(b=>b.classList.remove("selected"));
+    $("vendedor").value = lastVendorName;
+    document.querySelectorAll(".field").forEach(f=>f.classList.remove("has-error"));
+    $("btn-submit").disabled = false;
+    $("btn-submit").textContent = "Registrar";
+    $("btn-submit-desktop").disabled = false;
+    $("btn-submit-desktop").textContent = "Registrar";
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  // ---------------- Dashboard rendering ----------------
+  function rankRows(container, countMap, revenueMap, opts){
+    opts = opts || {};
+    const showRevenue = !!revenueMap;
+    let items = Object.keys(countMap)
+      .map(k => ({name:k, count: countMap[k]||0, revenue: (revenueMap ? revenueMap[k] : 0) || 0}));
+    if(!opts.showAll) items = items.filter(it => it.count > 0);
+    if(!opts.naturalOrder){
+      items = items.sort((a,b)=> showRevenue ? (b.revenue - a.revenue) : (b.count - a.count));
+    }
+    const totalItems = items.length;
+    if(opts.limit) items = items.slice(0, opts.limit);
+
+    container.innerHTML = "";
+    if(items.length === 0){
+      container.innerHTML = '<div class="empty-state" style="padding:14px 0;">Sem vendas registradas ainda nesta categoria.</div>';
+      return null;
+    }
+    const maxVal = Math.max(1, ...items.map(it => showRevenue ? it.revenue : it.count));
+    items.forEach(it=>{
+      const row = document.createElement("div");
+      row.className = "rank-item";
+      const qtdTxt = it.count + (it.count === 1 ? " registro" : " registros");
+      const valText = showRevenue ? (qtdTxt + " · " + fmtBRLShort(it.revenue)) : qtdTxt;
+      const barVal = showRevenue ? it.revenue : it.count;
+      row.innerHTML = `
+        <div class="rank-top"><span class="name">${escapeHtml(it.name)}</span><span class="val">${valText}</span></div>
+        <div class="rank-bar"><div style="width:${Math.max(4, (barVal/maxVal)*100)}%"></div></div>
+      `;
+      if(opts.onClick){
+        row.style.cursor = "pointer";
+        row.addEventListener("click", ()=> opts.onClick(it.name));
+      }
+      container.appendChild(row);
+    });
+    if(opts.limit && totalItems > opts.limit){
+      const more = document.createElement("div");
+      more.className = "hint";
+      more.style.marginTop = "8px";
+      more.textContent = "+ " + (totalItems - opts.limit) + " outro" + (totalItems - opts.limit === 1 ? "" : "s") + " item" + (totalItems - opts.limit === 1 ? "" : "s") + " com vendas";
+      container.appendChild(more);
+    }
+    return items.slice().sort((a,b)=>b.revenue-a.revenue)[0];
+  }
+
+  function timeAgo(ts){
+    const diff = Math.max(0, Date.now() - ts);
+    const mins = Math.floor(diff/60000);
+    if(mins < 1) return "agora mesmo";
+    if(mins < 60) return mins + " min atrás";
+    const hrs = Math.floor(mins/60);
+    if(hrs < 24) return hrs + "h atrás";
+    return Math.floor(hrs/24) + "d atrás";
+  }
+
+  async function loadDashboard(){
+    $("dash-loading").style.display = "block";
+    $("dash-content").style.display = "none";
+
+    const db = await loadDB();
+    const todasEntries = db.entries;
+    const entries = filtrarPorPeriodo(todasEntries, periodoSelecionado);
+    const summary = computeSummaryFromEntries(entries);
+
+    $("stat-total").textContent = summary.totalCount;
+    $("stat-novos").textContent = summary.tipoCount["Novo"] || 0;
+    $("stat-recorrentes").textContent = summary.tipoCount["Recorrente"] || 0;
+
+    renderTrendChart($("chart-trend"), computeTrendBuckets(entries, periodoSelecionado));
+
+    const topVendedor = rankRows($("rank-vendedor"), summary.vendedorCount, null, { onClick: (nome) => openVendorDetail(nome, entries) });
+    const champVendedorEl = $("champ-vendedor");
+    if(topVendedor){
+      champVendedorEl.style.display = "flex";
+      champVendedorEl.innerHTML = `🏆 <span><span class="k">Destaque do período:</span> ${escapeHtml(topVendedor.name)}</span>`;
+    } else {
+      champVendedorEl.style.display = "none";
+    }
+
+    rankRows($("rank-tipo"), summary.tipoCount, null);
+
+    const topSeg = rankRows($("rank-segmento"), summary.segCount, null, { onClick: (seg) => openSegmentoDetail(seg, entries) });
+    const champEl = $("champ-segmento");
+    if(topSeg){
+      champEl.style.display = "flex";
+      champEl.innerHTML = `🏆 <span><span class="k">Mais registros:</span> ${escapeHtml(topSeg.name)}</span>`;
+    } else {
+      champEl.style.display = "none";
+    }
+    rankRows($("rank-origem"), summary.oriCount, null);
+    rankRows($("rank-produto"), summary.prodCount, null);
+    rankRows($("rank-valor"), summary.valorCount, null, {naturalOrder:true});
+    rankRows($("rank-potencial"), summary.potencialCount, null, {naturalOrder:true});
+    rankRows($("rank-cidade"), summary.cidadeCount, null, {limit:10});
+    rankRows($("rank-estado"), summary.estadoCount, null);
+
+    const recentEl = $("recent-list");
+    recentEl.innerHTML = "";
+    if(entries.length === 0){
+      recentEl.innerHTML = '<div class="empty-state"><div class="big">Nenhum registro ainda</div>Registre o primeiro contato na aba "Nova venda".</div>';
+    } else {
+      entries.slice(0,8).forEach(e=>{
+        const row = document.createElement("div");
+        row.className = "recent-item";
+        row.innerHTML = `
+          <div>
+            <div class="who">${escapeHtml(e.vendedor)} · ${escapeHtml(e.cidade)}</div>
+            <div class="meta">${escapeHtml(e.segmento)} · ${timeAgo(e.ts)}</div>
+          </div>
+          <div class="amt">${escapeHtml(e.tipo)}</div>
+        `;
+        row.addEventListener("click", ()=> openSaleDetail(e));
+        recentEl.appendChild(row);
+      });
+    }
+
+    $("dash-loading").style.display = "none";
+    $("dash-content").style.display = "block";
+    $("export-count").textContent = todasEntries.length
+      ? todasEntries.length + " registros armazenados (todo o histórico), prontos para exportar."
+      : "Nenhum registro para exportar ainda.";
+
+    // aviso de configuração pendente (Apps Script ainda não foi configurado)
+    const capacityEl = $("alert-capacity");
+    if(!isConfigured()){
+      capacityEl.style.display = "block";
+      capacityEl.textContent = "⚙️ A planilha ainda não foi conectada (veja o guia de configuração). Por enquanto, nenhum registro está sendo salvo de verdade.";
+    } else {
+      capacityEl.style.display = "none";
+    }
+
+    // alerta de exportação semanal aos domingos
+    const weeklyEl = $("alert-weekly");
+    weeklyEl.style.display = (new Date().getDay() === 0) ? "block" : "none";
+  }
+
+  function csvEscape(v){
+    const s = (v===undefined || v===null) ? "" : String(v);
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  const CSV_HEADERS = ["Vendedor","Data","Telefone","Cidade","Estado","Tipo de cliente","Segmento","Origem","Produto de interesse","Valor estimado","Potencial","Registrado em"];
+  function entryToRow(e){
+    return [
+      e.vendedor, e.data, e.telefone, e.cidade, e.estado, e.tipo, e.segmento, e.origem, e.produto, e.valor, e.potencial,
+      new Date(e.ts).toLocaleString("pt-BR")
+    ];
+  }
+  function entriesToCSV(entries){
+    let csv = "\uFEFF" + CSV_HEADERS.map(csvEscape).join(";") + "\r\n";
+    entries.forEach(e => { csv += entryToRow(e).map(csvEscape).join(";") + "\r\n"; });
+    return csv;
+  }
+  function downloadCSV(csv, filename){
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function todayIsoCompact(){
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+
+  async function exportToCSV(){
+    const btn = $("btn-export");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Gerando arquivo...";
+
+    const db = await loadDB();
+    const entries = db.entries.slice().reverse();
+
+    downloadCSV(entriesToCSV(entries), "registros-cdbh-" + todayIsoCompact() + ".csv");
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+  $("btn-export").addEventListener("click", exportToCSV);
+
+})();
+</script>
+</body>
+</html>
