@@ -1,0 +1,2625 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Análise MKT CD BH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#302F2B;
+    --ink-2:#4C4D48;
+    --paper:#F7F5F0;
+    --card:#FFFFFF;
+    --signal:#A9C348;
+    --signal-press:#8CA93E;
+    --signal-text:#5F7A2C;
+    --success:#1F8A55;
+    --success-bg:#E7F4EC;
+    --slate:#5B6570;
+    --line:#E4E0D6;
+    --danger:#C1361B;
+    --radius:14px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    overscroll-behavior-y:contain;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--signal);outline-offset:2px;}
+
+  #app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;background:var(--paper);}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:var(--ink);
+    color:var(--paper);
+    padding:18px 20px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;top:0;z-index:10;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1;}
+  .brand .word1{font-size:22px;font-weight:700;letter-spacing:-0.02em;}
+  .brand .word2{font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--signal);}
+  .brand .tag{font-size:11px;color:#9BA3AB;margin-top:4px;letter-spacing:.04em;text-transform:uppercase;}
+  .badge{
+    background:rgba(169,195,72,0.20);
+    border:1px solid rgba(169,195,72,0.5);
+    color:#D7E6A8;
+    font-size:12px;font-weight:600;
+    padding:6px 10px;border-radius:999px;
+    white-space:nowrap;
+  }
+
+  main{flex:1;padding:18px 16px calc(150px + var(--safe-b));}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- Cards / sections ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .section-label{
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--slate);margin:0 0 10px 2px;
+  }
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px;}
+  .field .hint{font-size:12px;color:var(--slate);margin-top:5px;}
+  .field .error{font-size:12px;color:var(--danger);margin-top:5px;display:none;}
+  .field.has-error .error{display:block;}
+  .field.has-error input,.field.has-error select{border-color:var(--danger);}
+  .field.has-error .toggle-row,.field.has-error .toggle-col{outline:1.5px solid var(--danger);outline-offset:4px;border-radius:12px;}
+
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%;
+    font-size:16px;
+    font-family:inherit;
+    padding:12px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  textarea{resize:vertical;min-height:110px;font-family:'IBM Plex Mono',monospace;font-size:13px;}
+  textarea:focus{border-color:var(--signal);}
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%235B6570' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    padding-right:34px;
+  }
+  input:focus,select:focus{border-color:var(--signal);}
+
+  .money-wrap{position:relative;}
+  .money-wrap .prefix{
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    color:var(--slate);font-weight:600;font-family:'IBM Plex Mono',monospace;
+    pointer-events:none;
+  }
+  .money-wrap input{padding-left:34px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+  .toggle-row{display:flex;gap:8px;}
+  .toggle-btn{
+    flex:1;padding:12px 10px;border-radius:10px;border:1.5px solid var(--line);
+    background:var(--paper);color:var(--ink-2);font-weight:600;font-size:14px;cursor:pointer;
+  }
+  .toggle-btn.selected{
+    background:var(--ink);border-color:var(--ink);color:#fff;
+  }
+  
+  .toggle-col{display:flex;flex-direction:column;gap:8px;}
+  .toggle-col .toggle-btn{width:100%;text-align:left;}
+
+  #toggle-faixa{flex-wrap:wrap;}
+  #toggle-faixa .toggle-btn{flex:1 1 calc(50% - 8px);min-width:130px;}
+
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  /* ---------- Submit bar ---------- */
+  .bottom-dock{
+    position:fixed;left:0;right:0;bottom:0;
+    max-width:520px;margin:0 auto;z-index:20;
+  }
+  .submit-bar{
+    background:linear-gradient(to top, var(--paper) 75%, rgba(247,245,240,0));
+    padding:14px 16px 10px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .submit-bar .btn-row{display:flex;gap:10px;}
+  .btn-primary{
+    flex:1;
+    background:var(--signal);color:var(--ink);border:none;
+    font-size:16px;font-weight:700;letter-spacing:.01em;
+    padding:16px 18px;border-radius:12px;cursor:pointer;
+    box-shadow:0 8px 20px rgba(169,195,72,0.4);
+  }
+  .btn-primary:active{background:var(--signal-press);}
+  .btn-primary:disabled{opacity:.6;box-shadow:none;}
+
+  /* ---------- Tab bar ---------- */
+  .tabbar-fixed{
+    background:var(--card);border-top:1px solid var(--line);
+    display:flex;padding-bottom:calc(6px + var(--safe-b));
+  }
+  .tabbar-fixed button{
+    flex:1;background:none;border:none;padding:12px 6px 10px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    color:var(--slate);font-size:12px;font-weight:600;
+  }
+  .tabbar-fixed button .dot{width:6px;height:6px;border-radius:999px;background:transparent;}
+  .tabbar-fixed button.active{color:var(--ink);}
+  .tabbar-fixed button.active .dot{background:var(--signal);}
+
+  /* ---------- Dashboard ---------- */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .stat-card{background:var(--ink);color:var(--paper);border-radius:var(--radius);padding:14px 14px;}
+  .stat-card .label{font-size:11px;color:#9BA3AB;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  .stat-card .value{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;margin-top:6px;}
+  .stat-card.wide{grid-column:1 / -1;background:var(--card);color:var(--ink);border:1px solid var(--line);}
+  .stat-card.wide .label{color:var(--slate);}
+  .stat-card.wide .value{color:var(--ink);font-size:26px;}
+
+  .rank-item{margin-bottom:10px;}
+  .rank-item:last-child{margin-bottom:0;}
+  .rank-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .rank-top .name{font-weight:600;color:var(--ink-2);}
+  .rank-top .val{font-family:'IBM Plex Mono',monospace;color:var(--slate);}
+  .rank-bar{height:8px;border-radius:999px;background:var(--paper);border:1px solid var(--line);overflow:hidden;}
+  .rank-bar > div{height:100%;background:var(--signal);border-radius:999px;}
+
+  .period-filter{
+    display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .period-filter::-webkit-scrollbar{display:none;}
+  .period-btn{
+    flex:0 0 auto;padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--ink-2);font-size:13px;font-weight:600;
+    font-family:inherit;cursor:pointer;white-space:nowrap;
+  }
+  .period-btn.selected{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  .chart-wrap svg{display:block;width:100%;height:auto;}
+  #chart-trend{margin-bottom:0;}
+
+  .champion{
+    display:flex;align-items:center;gap:10px;
+    background:var(--success-bg);border:1px solid #BFE3CC;color:var(--success);
+    border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin-top:12px;
+  }
+  .champion .k{color:#3E7A56;font-weight:500;}
+
+  .recent-item{
+    cursor:pointer;transition:background .12s ease;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--line);
+  }
+  .recent-item:active{background:var(--paper);}
+  .recent-item:last-child{border-bottom:none;}
+  .recent-item .who{font-weight:600;font-size:13px;}
+  .recent-item .meta{font-size:12px;color:var(--slate);margin-top:2px;}
+  .recent-item .amt{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;}
+
+  .empty-state{text-align:center;padding:30px 10px;color:var(--slate);font-size:13px;}
+  .empty-state .big{font-size:15px;color:var(--ink-2);font-weight:600;margin-bottom:4px;}
+
+  .refresh-link{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:600;color:var(--signal-text);
+    background:none;border:none;cursor:pointer;padding:0;
+  }
+
+  /* ---------- Confirmation stamp ---------- */
+  #confirm-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  #confirm-overlay.show{opacity:1;pointer-events:auto;}
+  .stamp{
+    border:4px solid var(--signal);color:var(--signal);
+    border-radius:16px;padding:26px 30px;text-align:center;
+    transform:scale(.8) rotate(-6deg);opacity:0;
+    transition:transform .28s cubic-bezier(.2,1.4,.4,1), opacity .2s ease;
+  }
+  #confirm-overlay.show .stamp{transform:scale(1) rotate(-6deg);opacity:1;}
+  .stamp .t1{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;letter-spacing:.03em;}
+  .stamp .t2{font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;color:#D7E6A8;}
+  .stamp .t3{font-family:'Inter',sans-serif;font-size:11px;margin-top:10px;color:#B9C79A;font-weight:600;line-height:1.5;}
+  .stamp.fail{border-color:var(--danger);color:var(--danger);}
+  .stamp.fail .t2{color:#F0BBAE;}
+  .stamp.fail .t3{color:#F0BBAE;}
+  @media (prefers-reduced-motion: reduce){
+    .stamp{transition:none;transform:none;opacity:1;}
+    #confirm-overlay{transition:none;}
+  }
+
+  #review-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:45;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #review-overlay.show{opacity:1;pointer-events:auto;}
+  #sale-detail-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:46;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #sale-detail-overlay.show{opacity:1;pointer-events:auto;}
+  #vendor-detail-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:45;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #vendor-detail-overlay.show{opacity:1;pointer-events:auto;}
+  #segmento-detail-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:45;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #segmento-detail-overlay.show{opacity:1;pointer-events:auto;}
+  .review-card{width:100%;max-width:440px;max-height:82vh;overflow-y:auto;margin-bottom:0;}
+  .review-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .review-row:last-child{border-bottom:none;}
+  .review-row .k{color:var(--slate);font-weight:600;}
+  .review-row .v{color:var(--ink);font-weight:600;text-align:right;}
+
+  .note-banner{
+    font-size:12px;color:var(--slate);background:#EFEBE0;border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.5;
+  }
+
+  .alert-banner{
+    font-size:12px;font-weight:600;line-height:1.5;
+    border-radius:10px;padding:10px 12px;margin-bottom:10px;
+  }
+  .alert-warning{background:#FDF1DC;border:1px solid #F0D28C;color:#8A5A12;}
+  .alert-info{background:#E7EEF6;border:1px solid #BFD3EA;color:#2C4A66;}
+
+  /* ---------- PIN gate ---------- */
+  .pin-gate{text-align:center;padding:56px 22px 20px;}
+  .pin-gate .pin-icon{font-size:34px;margin-bottom:10px;}
+  .pin-gate h3{margin:0 0 6px;font-size:18px;}
+  .pin-gate .hint{font-size:13px;color:var(--slate);margin:0 0 20px;}
+  .pin-gate input[type=password]{
+    width:100%;text-align:center;letter-spacing:.04em;
+    font-size:16px;font-family:'IBM Plex Mono',monospace;
+    padding:13px 12px;border-radius:10px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--ink);margin-bottom:10px;
+  }
+  .pin-gate input[type=password]:focus{border-color:var(--signal);}
+  .pin-gate .error{display:none;font-size:12px;color:var(--danger);margin-bottom:10px;}
+  .pin-gate .error.show{display:block;}
+  .btn-unlock{
+    width:100%;background:var(--signal);color:var(--ink);border:none;
+    font-size:15px;font-weight:700;padding:13px 18px;border-radius:12px;cursor:pointer;
+  }
+  .btn-unlock:active{background:var(--signal-press);}
+
+  /* ================================================================
+     Painel v2
+     ================================================================ */
+  .chips-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+  .chips-scroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:10px;-webkit-overflow-scrolling:touch;}
+  .chips-scroll::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
+    border:1.5px solid var(--line);background:var(--card);color:var(--ink-2);
+    font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;
+  }
+  .chip:hover{border-color:#CFC9B8;}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .chip.chip-signal{background:rgba(169,195,72,.20);border-color:rgba(95,122,44,.55);color:var(--signal-text);}
+  .chip .x{opacity:.7;font-size:11px;}
+  .chip .cnt{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.65;}
+  .chip.on .cnt{opacity:.8;}
+  .chip .badge-n{background:var(--signal);color:var(--ink);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:700;}
+  .chip-clear{color:var(--danger);border-color:#EBC7BD;background:#FFF;}
+
+  .filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;}
+  .filters-panel{margin-bottom:14px;}
+  .fp-group{margin-bottom:14px;}
+  .fp-group:last-child{margin-bottom:0;}
+  .fp-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);margin-bottom:7px;}
+
+  .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .kpi{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px;text-align:left;
+    cursor:pointer;font-family:inherit;color:var(--ink);transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .kpi:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(48,47,43,.10);}
+  .kpi.dark{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--slate);}
+  .kpi.dark .label{color:#9BA3AB;}
+  .kpi .value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;margin:6px 0 7px;line-height:1.15;word-break:break-word;}
+  .kpi .delta{font-size:11.5px;font-weight:700;display:inline-block;padding:2px 8px;border-radius:999px;}
+  .delta.up{background:var(--success-bg);color:var(--success);}
+  .delta.down{background:#FBE9E4;color:var(--danger);}
+  .delta.flat{background:#EFEBE0;color:var(--slate);}
+  .kpi .sub{font-size:11.5px;color:var(--slate);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kpi.dark .sub{color:#9BA3AB;}
+  .kpi-hint{grid-column:1 / -1;font-size:11.5px;color:var(--slate);margin-top:-2px;}
+
+  .dash-tabs{
+    display:flex;gap:4px;background:#EAE6DA;padding:4px;border-radius:13px;margin-bottom:14px;
+    overflow-x:auto;scrollbar-width:none;
+  }
+  .dash-tabs::-webkit-scrollbar{display:none;}
+  .dash-tabs button{
+    flex:1 0 auto;border:none;background:transparent;padding:10px 14px;border-radius:10px;
+    font-weight:700;font-size:13px;color:var(--slate);cursor:pointer;font-family:inherit;white-space:nowrap;
+  }
+  .dash-tabs button.selected{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14);}
+  .dtab{display:none;}
+  .dtab.active{display:block;}
+
+  .card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .card-head .section-label{margin:0;}
+  .seg{display:inline-flex;background:#EAE6DA;border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap;}
+  .seg button{
+    border:none;background:transparent;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;
+    color:var(--slate);cursor:pointer;font-family:inherit;
+  }
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.14);}
+
+  .insight{
+    display:flex;gap:10px;align-items:flex-start;justify-content:space-between;width:100%;text-align:left;
+    background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px;
+    font-family:inherit;font-size:13px;line-height:1.5;color:var(--ink-2);cursor:pointer;
+  }
+  .insight:last-child{margin-bottom:0;}
+  .insight.static{cursor:default;}
+  .insight b{color:var(--ink);}
+  .insight .go{color:var(--signal-text);font-weight:700;white-space:nowrap;font-size:12px;}
+  button.insight:hover{border-color:#CFC9B8;background:#FBFAF6;}
+
+  .rk{
+    padding:7px 8px;margin:0 -8px 3px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;
+  }
+  .rk:hover{background:#FAF8F3;}
+  .rk.sel{background:rgba(169,195,72,.14);border-color:rgba(95,122,44,.45);}
+  .rk-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:5px;}
+  .rk-top .name{font-weight:600;color:var(--ink-2);}
+  .rk-top .val{font-family:'IBM Plex Mono',monospace;color:var(--slate);white-space:nowrap;font-size:12.5px;}
+  .rk-barrow{display:flex;align-items:center;gap:8px;}
+  .rk-bar{flex:1;height:8px;border-radius:999px;background:var(--paper);border:1px solid var(--line);overflow:hidden;}
+  .rk-bar > div{height:100%;background:var(--signal);border-radius:999px;}
+  .rk.sel .rk-bar > div{background:var(--signal-text);}
+  .rk-det{border:none;background:none;cursor:pointer;font-size:13px;padding:0 2px;line-height:1;opacity:.7;}
+  .rk-det:hover{opacity:1;}
+  .more{
+    width:100%;margin-top:6px;border:1.5px dashed var(--line);background:none;border-radius:10px;padding:8px;
+    font-size:12.5px;font-weight:700;color:var(--slate);cursor:pointer;font-family:inherit;
+  }
+
+  .tbars{display:flex;align-items:flex-end;gap:4px;height:170px;}
+  .tb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;}
+  .tb[data-act]{cursor:pointer;}
+  .tb[data-act]:hover .tbar{background:var(--signal-press);}
+  .tcol{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;width:100%;}
+  .tbar{width:100%;background:var(--signal);border-radius:5px 5px 2px 2px;min-height:2px;}
+  .tb.best .tbar{background:var(--signal-text);}
+  .tv{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--ink-2);margin-bottom:3px;white-space:nowrap;}
+  .tl{font-size:10px;color:var(--slate);margin-top:5px;height:13px;white-space:nowrap;overflow:visible;}
+
+  .cruz-controls{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;margin:6px 0 12px;}
+  .cruz-controls label{font-size:12px;font-weight:700;color:var(--slate);display:block;}
+  .cruz-controls select{margin-top:5px;padding:10px 10px;font-size:14px;}
+
+  .hm-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:72vh;-webkit-overflow-scrolling:touch;}
+  table.hm,table.vt{border-collapse:separate;border-spacing:0;font-size:12.5px;width:100%;}
+  .hm th,.hm td,.vt th,.vt td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;background:var(--card);}
+  .hm thead th,.vt thead th{position:sticky;top:0;z-index:2;font-weight:700;color:var(--ink-2);background:#F3F0E7;}
+  .hm thead th[data-act],.vt thead th[data-act]{cursor:pointer;}
+  .hm thead th[data-act]:hover{background:#E9E5D8;}
+  .hm tbody th,.vt tbody th{position:sticky;left:0;z-index:1;text-align:left;font-weight:700;color:var(--ink-2);background:#FAF8F3;}
+  .hm tbody th[data-act]{cursor:pointer;}
+  .hm tbody th[data-act]:hover{background:#EFEBE0;}
+  .hm thead th.corner{left:0;z-index:3;text-align:left;font-size:11px;color:var(--slate);min-width:120px;}
+  .hm th.demais{color:var(--slate);font-style:italic;}
+  .hm td{font-family:'IBM Plex Mono',monospace;font-weight:600;cursor:pointer;}
+  .hm td:hover{outline:2px solid var(--ink);outline-offset:-2px;}
+  .hm td.zero{color:#C9C4B6;cursor:default;background:var(--card);}
+  .hm td.zero:hover{outline:none;}
+  .hm .tot{background:#F3F0E7 !important;font-weight:700;}
+  .hm tr:last-child td,.hm tr:last-child th,.vt tr:last-child td,.vt tr:last-child th{border-bottom:none;}
+  .vt td{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  .vt td.foco{font-family:inherit;font-weight:600;color:var(--ink-2);text-align:left;}
+  .vt td.best{color:var(--success);background:var(--success-bg);}
+  .vt th.sorted{color:var(--signal-text);}
+  .vt tbody tr{cursor:pointer;}
+  .vt tbody tr:hover td{background:#FBFAF6;}
+  .vt tbody tr.sel th{background:rgba(169,195,72,.25);}
+  .vt tbody tr.idle td,.vt tbody tr.idle th{color:#A8A396;}
+  .vt tbody th{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:118px;}
+  .vt .mini{border:1px solid var(--line);background:var(--card);border-radius:7px;cursor:pointer;font-size:12px;padding:1px 6px;line-height:1.4;}
+
+  .stk{display:flex;height:24px;border-radius:8px;overflow:hidden;background:var(--paper);border:1px solid var(--line);}
+  .stk > span{display:block;height:100%;cursor:pointer;border-right:1.5px solid #fff;}
+  .stk > span:last-child{border-right:none;}
+  .stk > span:hover{filter:brightness(.92);}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-2);margin-top:12px;}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+  .mixrow{margin-bottom:14px;}
+  .mixhead{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:5px;}
+  .mixhead span{color:var(--slate);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+
+  .reg-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 4px;}
+  .rec{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+  .rec:hover{background:#FBFAF6;}
+  .rec:last-child{border-bottom:none;}
+  .rec .who{font-weight:600;font-size:13px;}
+  .rec .meta{font-size:12px;color:var(--slate);margin-top:2px;}
+  .rec .r{text-align:right;flex:0 0 auto;}
+  .rec .amt{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px;}
+  .rec .tag{font-size:11px;color:var(--slate);margin-top:3px;}
+
+  #drill-overlay{
+    position:fixed;inset:0;background:rgba(27,31,35,0.92);
+    display:flex;align-items:center;justify-content:center;
+    z-index:44;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    padding:20px;
+  }
+  #drill-overlay.show{opacity:1;pointer-events:auto;}
+  .drill-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .mk{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+  .mk span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--slate);}
+  .mk b{display:block;font-family:'IBM Plex Mono',monospace;font-size:15px;margin-top:3px;}
+
+  @media (min-width: 900px){
+    .kpi-grid{grid-template-columns:repeat(6,1fr);}
+    .kpi .value{font-size:17px;}
+  }
+
+  /* ---------- Desktop-only elements (hidden by default on mobile) ---------- */
+  .sidebar-brand{display:none;}
+  .btn-desktop-submit{display:none;}
+  .dash-grid{display:block;}
+
+  /* ================================================================
+     Versão desktop — tela cheia com barra lateral fixa
+     ================================================================ */
+  @media (min-width: 900px){
+    #app{
+      max-width:none;
+      flex-direction:row;
+      align-items:stretch;
+    }
+    .topbar{display:none;} /* a marca passa a ficar no topo da barra lateral */
+
+    .bottom-dock{
+      position:fixed;left:0;top:0;bottom:0;right:auto;
+      width:248px;max-width:none;margin:0;
+      background:var(--ink);
+      display:flex;flex-direction:column;
+      padding:22px 0 20px;
+      overflow-y:auto;
+    }
+    .sidebar-brand{
+      display:block;color:var(--paper);padding:0 22px 22px;margin-bottom:8px;
+      border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-brand .word1,.sidebar-brand .word2{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;letter-spacing:-0.02em;}
+    .sidebar-brand .word2{color:var(--signal);}
+    .sidebar-brand .tag{font-size:10px;color:#9BA3AB;margin-top:5px;letter-spacing:.04em;text-transform:uppercase;}
+
+    .submit-bar{display:none !important;} /* no desktop o botão fica embutido no fim do formulário — !important necessário pois o JS de troca de aba define display inline */
+
+    .tabbar-fixed{
+      background:none;border-top:none;padding-bottom:0;
+      flex-direction:column;align-items:stretch;gap:2px;padding:0 12px;
+    }
+    .tabbar-fixed button{
+      flex-direction:row;justify-content:flex-start;gap:10px;
+      padding:11px 12px;border-radius:10px;color:#9BA3AB;font-size:13px;
+    }
+    .tabbar-fixed button:hover{background:rgba(255,255,255,0.06);}
+    .tabbar-fixed button.active{background:rgba(169,195,72,0.16);color:#fff;}
+    .tabbar-fixed button .dot{width:7px;height:7px;}
+
+    main{
+      margin-left:248px;
+      padding:36px 40px 60px;
+      max-width:none;
+    }
+    #view-form{max-width:640px;margin:0 auto;}
+    #view-dashboard #dash-content{max-width:1120px;margin:0 auto;}
+    #view-dashboard #pin-gate{max-width:420px;margin:40px auto 0;}
+    #view-dashboard #dash-loading{max-width:420px;margin:40px auto 0;}
+
+    .btn-desktop-submit{
+      display:block;width:100%;margin-top:6px;box-shadow:0 8px 20px rgba(169,195,72,0.3);
+    }
+
+    .dash-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:16px;
+      align-items:start;
+    }
+    .dash-grid .card{margin-bottom:0;}
+
+    #view-dashboard .stat-grid{grid-template-columns:1fr 1fr 1fr;}
+    #view-dashboard .stat-grid .stat-card.wide{grid-column:auto;}
+  }
+</style>
+
+</head>
+<body>
+<div id="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div><span class="word1">Análise MKT</span> <span class="word2">CD BH</span></div>
+      <div class="tag">Registro comercial de campo</div>
+    </div>
+  </div>
+
+  <main>
+    <!-- ===================== FORM VIEW ===================== -->
+    <section id="view-form" class="view active">
+
+      <div class="card">
+        <div class="section-label">Quem e quando</div>
+        <div class="row-2">
+          <div class="field" id="f-vendedor">
+            <label for="vendedor">Vendedor</label>
+            <select id="vendedor"></select>
+            <div class="error">Selecione o vendedor.</div>
+          </div>
+          <div class="field" id="f-data">
+            <label for="data">Data</label>
+            <input type="date" id="data" autocomplete="off">
+            <div class="error">Informe a data da venda.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Cliente</div>
+        <div class="field" id="f-pedido">
+          <label for="pedido">Número do pedido</label>
+          <input type="text" id="pedido" placeholder="Nº do pedido" autocomplete="off" inputmode="numeric">
+        </div>
+        <div class="field" id="f-cidade">
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" list="cidades-datalist" placeholder="Digite ou escolha a cidade" autocomplete="off">
+          <datalist id="cidades-datalist"></datalist>
+          <div class="error">Informe a cidade.</div>
+        </div>
+        <div class="field" id="f-estado">
+          <label for="estado">Estado</label>
+          <select id="estado"></select>
+          <div class="error">Selecione o estado.</div>
+        </div>
+        <div class="field" id="f-segmento">
+          <label for="segmento">Segmento do cliente</label>
+          <select id="segmento"></select>
+          <div class="error">Selecione o segmento do cliente.</div>
+        </div>
+        <div class="field" id="f-origem">
+          <label for="origem">Origem do cliente</label>
+          <select id="origem"></select>
+          <div class="error">Selecione a origem do cliente.</div>
+        </div>
+        <div class="field" id="f-tipo">
+          <label>Cliente novo ou recorrente</label>
+          <div class="toggle-row" id="toggle-tipo">
+            <button type="button" class="toggle-btn" data-val="Novo">Novo</button>
+            <button type="button" class="toggle-btn" data-val="Recorrente">Recorrente</button>
+          </div>
+          <div class="error">Selecione se o cliente é novo ou recorrente.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Produto</div>
+        <div class="field" id="f-produto">
+          <label for="produto">Produto principal de interesse</label>
+          <select id="produto"></select>
+          <div class="error">Selecione o produto de interesse.</div>
+        </div>
+        <div class="field" id="f-valor">
+          <label for="valor">Valor da venda</label>
+          <input type="text" id="valor" placeholder="R$ 0,00" autocomplete="off" inputmode="decimal">
+          <div class="error">Informe o valor da venda.</div>
+        </div>
+        <div class="field" id="f-faixa">
+          <label>Faixa da venda</label>
+          <div class="toggle-row" id="toggle-faixa">
+            <button type="button" class="toggle-btn faixa-btn" data-val="Até R$ 500">Até R$ 500</button>
+            <button type="button" class="toggle-btn faixa-btn" data-val="R$ 500–2.000">R$ 500–2.000</button>
+            <button type="button" class="toggle-btn faixa-btn" data-val="R$ 2.000–5.000">R$ 2.000–5.000</button>
+            <button type="button" class="toggle-btn faixa-btn" data-val="R$ 5.000–10.000">R$ 5.000–10.000</button>
+            <button type="button" class="toggle-btn faixa-btn" data-val="Acima de R$ 10.000">Acima de R$ 10.000</button>
+          </div>
+          <div class="error">Informe o valor da venda para marcar a faixa.</div>
+        </div>
+      </div>
+
+      <div class="note-banner">Ao enviar, o registro vai direto para a planilha em tempo real. Se a conexão falhar, ele NÃO é salvo — você verá um aviso claro e poderá tentar novamente.</div>
+
+      <button type="button" class="btn-primary btn-desktop-submit" id="btn-submit-desktop">Registrar</button>
+    </section>
+
+    <!-- ===================== DASHBOARD VIEW ===================== -->
+    <section id="view-dashboard" class="view">
+      <div id="pin-gate" class="pin-gate">
+        <div class="pin-icon">🔒</div>
+        <h3>Painel protegido</h3>
+        <p class="hint">Digite o PIN de acesso para ver os resultados.</p>
+        <input type="password" id="pin-input" autocomplete="off" placeholder="PIN de acesso">
+        <div class="error" id="pin-error">PIN incorreto. Tente novamente.</div>
+        <button type="button" class="btn-unlock" id="btn-unlock">Entrar</button>
+      </div>
+      <div id="dash-loading" class="empty-state" style="display:none;">Carregando painel…</div>
+      <div id="dash-content" style="display:none;">
+
+        <div class="period-filter" id="period-filter">
+          <button type="button" class="period-btn" data-periodo="hoje">Hoje</button>
+          <button type="button" class="period-btn" data-periodo="semana">Esta semana</button>
+          <button type="button" class="period-btn selected" data-periodo="mes">Este mês</button>
+          <button type="button" class="period-btn" data-periodo="6meses">6 meses</button>
+          <button type="button" class="period-btn" data-periodo="1ano">1 ano</button>
+        </div>
+
+        <div class="filter-bar">
+          <button type="button" class="chip" id="btn-toggle-filters" data-act="toggle-filters" aria-expanded="false">🎛️ Filtros <span class="badge-n" id="filter-count" style="display:none;"></span></button>
+          <div class="chips-wrap" id="active-chips"></div>
+          <button type="button" class="chip chip-clear" id="btn-clear-filters" data-act="clear" style="display:none;">Limpar tudo</button>
+        </div>
+        <div class="card filters-panel" id="filters-panel" style="display:none;"></div>
+
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+        <div class="dash-tabs" id="dash-tabs" role="tablist">
+          <button type="button" role="tab" data-act="tab" data-dtab="geral" class="selected" aria-selected="true">📊 Visão geral</button>
+          <button type="button" role="tab" data-act="tab" data-dtab="cruz" aria-selected="false">🔀 Cruzamentos</button>
+          <button type="button" role="tab" data-act="tab" data-dtab="pessoas" aria-selected="false">🏆 Vendedores</button>
+          <button type="button" role="tab" data-act="tab" data-dtab="reg" aria-selected="false">🧾 Registros</button>
+        </div>
+
+        <div class="dtab active" id="dtab-geral">
+          <div class="card">
+            <div class="card-head"><div class="section-label">💡 O que os dados dizem</div></div>
+            <div id="insights"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="section-label" id="trend-title">Registros por dia</div>
+              <div class="seg" id="trend-seg">
+                <button type="button" class="on" data-act="trend" data-m="n">Registros</button>
+                <button type="button" data-act="trend" data-m="sum">Vendido</button>
+              </div>
+            </div>
+            <div id="chart-trend"></div>
+          </div>
+          <div class="hint" style="margin:0 2px 10px;">Toque em qualquer item dos quadros abaixo para filtrar o painel inteiro · 🔍 abre os registros daquele item.</div>
+          <div class="dash-grid" id="dim-grid"></div>
+        </div>
+
+        <div class="dtab" id="dtab-cruz">
+          <div class="card">
+            <div class="section-label">Comparações rápidas</div>
+            <div class="chips-scroll" id="cruz-presets"></div>
+            <div class="cruz-controls">
+              <label>Linhas<select id="cruz-row"></select></label>
+              <button type="button" class="chip" data-act="cswap" title="Inverter linhas e colunas" aria-label="Inverter linhas e colunas">⇄</button>
+              <label>Colunas<select id="cruz-col"></select></label>
+            </div>
+            <div class="section-label" style="margin-top:4px;">Medir por</div>
+            <div class="seg" id="cruz-metric"></div>
+          </div>
+          <div class="card">
+            <div id="cruz-table"></div>
+            <div class="hint" id="cruz-hint" style="margin-top:10px;"></div>
+          </div>
+          <div class="card">
+            <div class="section-label">🔎 Leitura do cruzamento</div>
+            <div id="cruz-insights"></div>
+          </div>
+        </div>
+
+        <div class="dtab" id="dtab-pessoas">
+          <div class="card">
+            <div class="section-label">Comparativo da equipe</div>
+            <div id="vend-table"></div>
+          </div>
+          <div class="card">
+            <div class="section-label">Participação no faturamento</div>
+            <div id="vend-share"></div>
+          </div>
+          <div class="card">
+            <div class="section-label">Perfil de cada vendedor</div>
+            <div class="chips-scroll" id="mix-dims"></div>
+            <div id="vend-mix"></div>
+          </div>
+        </div>
+
+        <div class="dtab" id="dtab-reg">
+          <div class="card">
+            <div class="section-label">Registros do recorte</div>
+            <input type="text" id="rec-q" placeholder="Buscar por vendedor, cidade, segmento, pedido…" autocomplete="off">
+            <div class="reg-tools">
+              <div class="seg" id="rec-sort">
+                <button type="button" class="on" data-act="rsort" data-s="recentes">Recentes</button>
+                <button type="button" data-act="rsort" data-s="maior">Maior valor</button>
+                <button type="button" data-act="rsort" data-s="menor">Menor valor</button>
+              </div>
+              <div class="hint" id="rec-count" style="margin:0;"></div>
+            </div>
+            <div id="rec-list"></div>
+            <button type="button" class="toggle-btn" id="rec-more" style="display:none;width:100%;margin-top:10px;">Ver mais</button>
+            <button type="button" class="toggle-btn" id="rec-csv" style="display:none;width:100%;margin-top:10px;">⬇ Baixar este recorte (CSV)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Backup dos dados</div>
+          <div class="alert-banner alert-warning" id="alert-capacity" style="display:none;"></div>
+          <div class="alert-banner alert-info" id="alert-weekly" style="display:none;">📅 Hoje é domingo — hora de fazer a exportação semanal dos dados.</div>
+          <div class="field" style="margin-bottom:10px;">
+            <div class="hint" style="margin-top:0;">Exporte semanalmente para não correr risco de perder o histórico de registros.</div>
+          </div>
+          <button class="btn-unlock" id="btn-export" type="button">⬇ Exportar dados (CSV)</button>
+          <div class="hint" id="export-count" style="text-align:center;margin-top:8px;"></div>
+        </div>
+
+        <div style="text-align:center;margin-top:6px;">
+          <button class="refresh-link" id="btn-refresh">↻ Atualizar painel</button>
+          <div class="hint" id="dash-updated" style="text-align:center;margin-top:4px;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="bottom-dock">
+    <div class="sidebar-brand">
+      <div><span class="word1">Análise MKT</span> <span class="word2">CD BH</span></div>
+      <div class="tag">Registro comercial de campo</div>
+    </div>
+
+    <div class="submit-bar" id="submit-bar">
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-submit">Registrar</button>
+      </div>
+    </div>
+
+    <nav class="tabbar-fixed" id="tabbar">
+      <button data-view="form" class="active">
+        <span class="dot"></span> Nova venda
+      </button>
+      <button data-view="dashboard">
+        <span class="dot"></span> Painel
+      </button>
+    </nav>
+  </div>
+
+  <div id="confirm-overlay">
+    <div class="stamp" id="stamp-box">
+      <div class="t1" id="stamp-title">REGISTRADO</div>
+      <div class="t2" id="stamp-detail">—</div>
+      <div class="t3" id="stamp-note" style="display:none;"></div>
+      <button type="button" class="btn-primary" id="btn-stamp-ok" style="display:none;margin-top:16px;box-shadow:none;">Entendi</button>
+    </div>
+  </div>
+
+  <div id="review-overlay">
+    <div class="card review-card">
+      <div class="section-label">Confira antes de enviar</div>
+      <div id="review-list"></div>
+      <div class="btn-row">
+        <button type="button" class="toggle-btn" id="btn-review-back">Voltar e editar</button>
+        <button type="button" class="btn-primary" id="btn-review-send" style="box-shadow:none;">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sale-detail-overlay">
+    <div class="card review-card">
+      <div class="section-label">Detalhes da venda</div>
+      <div id="sale-detail-list"></div>
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="btn-sale-detail-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="drill-overlay">
+    <div class="card review-card">
+      <div class="section-label" id="drill-title">Detalhes</div>
+      <div class="drill-kpis" id="drill-kpis"></div>
+      <div id="drill-list"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button type="button" class="toggle-btn" id="btn-drill-csv">⬇ CSV</button>
+        <button type="button" class="btn-primary" id="btn-drill-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vendor-detail-overlay">
+    <div class="card review-card">
+      <div class="section-label" id="vd-name">Vendedor</div>
+
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-card wide">
+          <div class="label">Total de registros</div>
+          <div class="value" id="vd-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Novos</div>
+          <div class="value" id="vd-novos">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Recorrentes</div>
+          <div class="value" id="vd-recorrentes">0</div>
+        </div>
+      </div>
+
+      <div class="section-label">Registros deste vendedor</div>
+      <div id="vd-lista-vendas" style="margin-bottom:16px;"></div>
+
+      <div class="section-label">Segmento</div>
+      <div id="vd-rank-segmento"></div>
+
+      <div class="section-label" style="margin-top:14px;">Origem</div>
+      <div id="vd-rank-origem"></div>
+
+      <div class="section-label" style="margin-top:14px;">Produto de interesse</div>
+      <div id="vd-rank-produto"></div>
+
+      <div class="section-label" style="margin-top:14px;">Faixa da venda</div>
+      <div id="vd-rank-valor"></div>
+
+      <div class="section-label" style="margin-top:14px;">Cidade</div>
+      <div id="vd-rank-cidade"></div>
+
+      <div class="section-label" style="margin-top:14px;">Estado</div>
+      <div id="vd-rank-estado"></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button type="button" class="toggle-btn" id="btn-vendor-export-txt">⬇ Resumo (texto)</button>
+        <button type="button" class="toggle-btn" id="btn-vendor-export-csv">⬇ Registros (CSV)</button>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button type="button" class="btn-primary" id="btn-vendor-detail-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="segmento-detail-overlay">
+    <div class="card review-card">
+      <div class="section-label" id="sd-name">Segmento</div>
+
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-card wide">
+          <div class="label">Total de registros</div>
+          <div class="value" id="sd-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Novos</div>
+          <div class="value" id="sd-novos">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Recorrentes</div>
+          <div class="value" id="sd-recorrentes">0</div>
+        </div>
+      </div>
+
+      <div class="section-label">Registros deste segmento</div>
+      <div id="sd-lista-vendas" style="margin-bottom:16px;"></div>
+
+      <div class="section-label">Vendedor</div>
+      <div id="sd-rank-vendedor"></div>
+
+      <div class="section-label" style="margin-top:14px;">Origem</div>
+      <div id="sd-rank-origem"></div>
+
+      <div class="section-label" style="margin-top:14px;">Produto de interesse</div>
+      <div id="sd-rank-produto"></div>
+
+      <div class="section-label" style="margin-top:14px;">Faixa da venda</div>
+      <div id="sd-rank-valor"></div>
+
+      <div class="section-label" style="margin-top:14px;">Cidade</div>
+      <div id="sd-rank-cidade"></div>
+
+      <div class="section-label" style="margin-top:14px;">Estado</div>
+      <div id="sd-rank-estado"></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button type="button" class="btn-primary" id="btn-segmento-detail-close" style="box-shadow:none;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------- Reference lists (mirrors the spreadsheet's "Listas" tab) ----------------
+  const VENDEDORES = ["Samy", "Junior", "Vendedor 3", "Vendedor 4"];
+  const ESTADOS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+  const SEGMENTOS = ["Condomínio","Indústrias","Distribuidor","Bar/Restaurante","Igreja","Empresa","Consumidor final","Locador","Hospital","Prefeitura","Construtora","Escola","Outro"];
+  const ORIGENS = ["Celular Google","Celular Meta","Indicação","Prospecção individual","E-mail","Cliente recorrente","Outro"];
+  const PRODUTOS = ["Móvel de plástico tradicional","Móvel de plástico Premium","Linha de madeira","Linha industrial"];
+  const FAIXAS = ["Até R$ 500","R$ 500–2.000","R$ 2.000–5.000","R$ 5.000–10.000","Acima de R$ 10.000"];
+  function faixaFromValor(v){
+    if(v <= 500) return FAIXAS[0];
+    if(v <= 2000) return FAIXAS[1];
+    if(v <= 5000) return FAIXAS[2];
+    if(v <= 10000) return FAIXAS[3];
+    return FAIXAS[4];
+  }
+  const CIDADES = ["Uberlândia","Contagem","Juiz de Fora","Montes Claros","Betim","Uberaba","Ribeirão das Neves","Governador Valadares","Belo Horizonte","Brumadinho","Caeté","Capim Branco","Confins","Esmeraldas","Florestal","Ibirité","Igarapé","Itaguara","Itatiaiuçu","Jaboticatubas","Juatuba","Lagoa Santa","Mário Campos","Mateus Leme","Matozinhos","Nova Lima","Nova União","Pedro Leopoldo","Raposos","Rio Acima","Rio Manso","Sabará","Santa Luzia","São Joaquim de Bicas","São José da Lapa","Sarzedo","Taquaraçu de Minas","Vespasiano"];
+
+  function fillSelect(sel, options, placeholder){
+    sel.innerHTML = "";
+    if(placeholder){
+      const o = document.createElement("option");
+      o.value = ""; o.textContent = placeholder; o.disabled = true; o.selected = true;
+      sel.appendChild(o);
+    }
+    options.forEach(opt=>{
+      const o = document.createElement("option");
+      o.value = opt; o.textContent = opt;
+      sel.appendChild(o);
+    });
+  }
+
+  const $ = id => document.getElementById(id);
+
+  function escapeHtml(str){
+    return String(str==null ? "" : str).replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+  }
+
+  fillSelect($("vendedor"), VENDEDORES, "Selecione o vendedor");
+  fillSelect($("estado"), ESTADOS, "Selecione");
+  fillSelect($("segmento"), SEGMENTOS, "Selecione o segmento");
+  fillSelect($("origem"), ORIGENS, "Selecione a origem");
+  fillSelect($("produto"), PRODUTOS, "Selecione o produto");
+  (function preencherCidades(){
+    const datalist = $("cidades-datalist");
+    CIDADES.forEach(c=>{
+      const opt = document.createElement("option");
+      opt.value = c;
+      datalist.appendChild(opt);
+    });
+  })();
+
+  // default date = today, in local time
+  (function setToday(){
+    const iso = () => {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    };
+    $("data").value = iso();
+    // reforço: alguns navegadores (Safari) sobrescrevem o valor com autopreenchimento
+    // logo após o carregamento da página — este timeout garante a data correta.
+    setTimeout(()=>{ $("data").value = iso(); }, 150);
+  })();
+
+  const fmtBRL = n => "R$ " + Number(n||0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmtBRLShort = n => "R$ " + Number(n||0).toLocaleString("pt-BR", {maximumFractionDigits:0});
+
+  // ---------------- Filtro de período do painel ----------------
+  let periodoSelecionado = "mes";
+
+  function inicioDoPeriodo(periodo){
+    const agora = new Date();
+    const hoje0h = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+    if(periodo === "hoje") return hoje0h;
+    if(periodo === "semana"){
+      const diaSemana = (hoje0h.getDay() + 6) % 7; // 0 = segunda
+      const inicio = new Date(hoje0h);
+      inicio.setDate(inicio.getDate() - diaSemana);
+      return inicio;
+    }
+    if(periodo === "mes") return new Date(agora.getFullYear(), agora.getMonth(), 1);
+    if(periodo === "6meses"){
+      const d = new Date(hoje0h);
+      d.setMonth(d.getMonth() - 6);
+      return d;
+    }
+    if(periodo === "1ano"){
+      const d = new Date(hoje0h);
+      d.setFullYear(d.getFullYear() - 1);
+      return d;
+    }
+    return new Date(0);
+  }
+
+  function filtrarPorPeriodo(entries, periodo){
+    const inicio = inicioDoPeriodo(periodo).getTime();
+    return entries.filter(e => e.ts >= inicio);
+  }
+
+  // ---------------- Gráficos (SVG simples, sem dependências) ----------------
+  const MESES_ABREV = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  function computeTrendBuckets(entries, periodo){
+    const inicio = inicioDoPeriodo(periodo);
+    const fim = new Date();
+    const spanDias = Math.max(0.1, (fim - inicio) / 86400000);
+    let granularidade;
+    if(spanDias <= 1.5) granularidade = "hora";
+    else if(spanDias <= 14) granularidade = "dia";
+    else if(spanDias <= 90) granularidade = "semana";
+    else granularidade = "mes";
+
+    function chave(d){
+      if(granularidade === "hora") return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate()+"-"+d.getHours();
+      if(granularidade === "dia") return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
+      if(granularidade === "semana"){
+        const diaSemana = (d.getDay()+6)%7;
+        const seg = new Date(d.getFullYear(), d.getMonth(), d.getDate()-diaSemana);
+        return "s"+seg.getFullYear()+"-"+seg.getMonth()+"-"+seg.getDate();
+      }
+      return d.getFullYear()+"-"+d.getMonth();
+    }
+    function rotulo(d){
+      if(granularidade === "hora") return d.getHours()+"h";
+      if(granularidade === "dia") return d.getDate()+"/"+(d.getMonth()+1);
+      if(granularidade === "semana") return d.getDate()+"/"+(d.getMonth()+1);
+      return MESES_ABREV[d.getMonth()];
+    }
+
+    const buckets = {};
+    entries.forEach(e=>{
+      const d = new Date(e.ts);
+      const k = chave(d);
+      if(!buckets[k]) buckets[k] = { label: rotulo(d), sortTs: d.getTime(), total: 0 };
+      buckets[k].total += 1;
+    });
+    return Object.values(buckets).sort((a,b)=>a.sortTs-b.sortTs);
+  }
+
+  function renderTrendChart(container, buckets){
+    if(buckets.length === 0){
+      container.innerHTML = '<div class="empty-state" style="padding:14px 0;">Sem registros neste período.</div>';
+      return;
+    }
+    const w = 320, h = 130, padBottom = 18;
+    const maxVal = Math.max(1, ...buckets.map(b=>b.total));
+    const slot = w / buckets.length;
+    const barWidth = Math.max(2, slot - 4);
+    let bars = "";
+    buckets.forEach((b,i)=>{
+      const barH = Math.max(2, (b.total/maxVal) * (h - padBottom - 6));
+      const x = i*slot + (slot-barWidth)/2;
+      const y = (h - padBottom) - barH;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" style="fill:var(--signal)"><title>${escapeHtml(b.label)}: ${b.total} registro${b.total===1?'':'s'}</title></rect>`;
+    });
+    let labels = "";
+    if(buckets.length <= 14){
+      buckets.forEach((b,i)=>{
+        const x = i*slot + slot/2;
+        labels += `<text x="${x.toFixed(1)}" y="${h-4}" font-size="8" text-anchor="middle" style="fill:var(--slate)">${escapeHtml(b.label)}</text>`;
+      });
+    }
+    container.innerHTML = `<div class="chart-wrap"><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="height:120px;">${bars}${labels}</svg></div>`;
+  }
+
+  // ---------------- Formatação de data ----------------
+  function fmtDataBR(iso){
+    const partes = String(iso||"").split("-");
+    return partes.length === 3 ? (partes[2] + "/" + partes[1] + "/" + partes[0]) : (iso || "");
+  }
+
+  // ---------------- Tipo toggle ----------------
+  let tipoSelecionado = null;
+  document.querySelectorAll("#toggle-tipo .toggle-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#toggle-tipo .toggle-btn").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      tipoSelecionado = btn.dataset.val;
+      $("f-tipo") && $("f-tipo").classList.remove("has-error");
+      if(tipoSelecionado === "Recorrente"){
+        $("origem").value = "Cliente recorrente";
+        $("f-origem") && $("f-origem").classList.remove("has-error");
+      }
+    });
+  });
+
+  // ---------------- Valor da venda: máscara de moeda + faixa automática ----------------
+  let faixaSelecionada = null;
+  let valorNumerico = null;
+
+  function marcarFaixa(label){
+    document.querySelectorAll("#toggle-faixa .toggle-btn").forEach(b=>{
+      b.classList.toggle("selected", b.dataset.val === label);
+    });
+    faixaSelecionada = label;
+    $("f-faixa") && $("f-faixa").classList.remove("has-error");
+  }
+
+  $("valor").addEventListener("input", (e)=>{
+    const digits = e.target.value.replace(/\D/g,"");
+    if(!digits){
+      e.target.value = "";
+      valorNumerico = null;
+      document.querySelectorAll("#toggle-faixa .toggle-btn").forEach(b=>b.classList.remove("selected"));
+      faixaSelecionada = null;
+      return;
+    }
+    valorNumerico = parseInt(digits, 10) / 100;
+    e.target.value = "R$ " + valorNumerico.toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+    $("f-valor") && $("f-valor").classList.remove("has-error");
+    marcarFaixa(faixaFromValor(valorNumerico));
+  });
+
+  // Permite corrigir a faixa manualmente, se necessário
+  document.querySelectorAll("#toggle-faixa .toggle-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      marcarFaixa(btn.dataset.val);
+    });
+  });
+
+
+  // ---------------- Dashboard access PIN ----------------
+  const DASHBOARD_PIN = "Alan080878141201*MCZ";
+  let unlocked = false;
+  let pinAttempts = 0;
+  let lockedUntil = 0;
+
+  function tryUnlock(){
+    if(Date.now() < lockedUntil){
+      const secs = Math.ceil((lockedUntil - Date.now())/1000);
+      $("pin-error").textContent = "Muitas tentativas. Aguarde " + secs + "s e tente de novo.";
+      $("pin-error").classList.add("show");
+      return;
+    }
+    const val = $("pin-input").value;
+    if(val === DASHBOARD_PIN){
+      unlocked = true;
+      pinAttempts = 0;
+      $("pin-input").value = "";
+      $("pin-error").classList.remove("show");
+      $("pin-gate").style.display = "none";
+      loadDashboard();
+    } else {
+      pinAttempts++;
+      if(pinAttempts >= 5){
+        lockedUntil = Date.now() + 30000;
+        pinAttempts = 0;
+        $("pin-error").textContent = "Muitas tentativas erradas. Aguarde 30s e tente de novo.";
+      } else {
+        $("pin-error").textContent = "PIN incorreto. Tente novamente.";
+      }
+      $("pin-error").classList.add("show");
+    }
+  }
+  $("btn-unlock").addEventListener("click", tryUnlock);
+  $("pin-input").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") tryUnlock();
+  });
+
+  // ---------------- View switching ----------------
+  let currentView = "form";
+  function switchView(name){
+    currentView = name;
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    $("view-" + name).classList.add("active");
+    document.querySelectorAll("#tabbar button").forEach(b=>b.classList.toggle("active", b.dataset.view === name));
+    $("submit-bar").style.display = name === "form" ? "flex" : "none";
+    if(name === "dashboard"){
+      if(unlocked){
+        $("pin-gate").style.display = "none";
+        loadDashboard();
+      } else {
+        $("pin-gate").style.display = "block";
+        $("dash-loading").style.display = "none";
+        $("dash-content").style.display = "none";
+      }
+    }
+  }
+  document.querySelectorAll("#tabbar button").forEach(b=>{
+    b.addEventListener("click", ()=>switchView(b.dataset.view));
+  });
+  $("btn-refresh").addEventListener("click", loadDashboard);
+
+  document.querySelectorAll("#period-filter .period-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(btn.classList.contains("selected")) return;
+      document.querySelectorAll("#period-filter .period-btn").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      periodoSelecionado = btn.dataset.periodo;
+      if(DASH.loaded) renderDashboard(); else loadDashboard();
+    });
+  });
+
+  // ---------------- Google Sheets como banco de dados ----------------
+  // Cole aqui a URL do seu Apps Script (veja o guia de configuração).
+  // Enquanto não configurar, nenhuma venda é salva de verdade (o painel fica vazio).
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4PFCH7XzExUDKOl2m-BflP1SU4zE4fFJDcDZsmtxLAqSA3lL4RC41sC8nRV3ai76ncg/exec";
+
+  function isConfigured(){
+    return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("COLOQUE_AQUI");
+  }
+
+  function emptySummary(){
+    const bySeg = {}, byOri = {}, byProd = {}, byTipo = {Novo:0, Recorrente:0}, byFaixa = {};
+    SEGMENTOS.forEach(s=>bySeg[s]=0);
+    ORIGENS.forEach(s=>byOri[s]=0);
+    PRODUTOS.forEach(s=>byProd[s]=0);
+    FAIXAS.forEach(s=>byFaixa[s]=0);
+    return {
+      totalCount:0,
+      segCount:{...bySeg},
+      oriCount:{...byOri},
+      prodCount:{...byProd},
+      tipoCount:{...byTipo},
+      faixaCount:{...byFaixa},
+      valorTotal:0,
+      valorContagem:0,
+      vendedorCount:{},
+      vendedorRevenue:{},
+      estadoCount:{},
+      cidadeCount:{}
+    };
+  }
+
+  function computeSummaryFromEntries(entries){
+    const summary = emptySummary();
+    entries.forEach(entry=>{
+      summary.totalCount += 1;
+      if(entry.segmento) summary.segCount[entry.segmento] = (summary.segCount[entry.segmento]||0) + 1;
+      if(entry.origem) summary.oriCount[entry.origem] = (summary.oriCount[entry.origem]||0) + 1;
+      if(entry.produto) summary.prodCount[entry.produto] = (summary.prodCount[entry.produto]||0) + 1;
+      if(entry.tipo) summary.tipoCount[entry.tipo] = (summary.tipoCount[entry.tipo]||0) + 1;
+      if(entry.faixa) summary.faixaCount[entry.faixa] = (summary.faixaCount[entry.faixa]||0) + 1;
+      // Só soma valores numéricos válidos; registros antigos (texto de faixa) ficam de fora.
+      const valorNum = parseValor(entry.valor) || 0;
+      if(valorNum > 0){
+        summary.valorTotal += valorNum;
+        summary.valorContagem += 1;
+      }
+      if(entry.vendedor){
+        summary.vendedorCount[entry.vendedor] = (summary.vendedorCount[entry.vendedor]||0) + 1;
+        summary.vendedorRevenue[entry.vendedor] = (summary.vendedorRevenue[entry.vendedor]||0) + valorNum;
+      }
+      if(entry.estado) summary.estadoCount[entry.estado] = (summary.estadoCount[entry.estado]||0) + 1;
+      if(entry.cidade) summary.cidadeCount[entry.cidade] = (summary.cidadeCount[entry.cidade]||0) + 1;
+    });
+    return summary;
+  }
+
+  // Busca todas as vendas já registradas na planilha (mais recente primeiro).
+  async function loadDB(){
+    if(!isConfigured()) return { summary: emptySummary(), entries: [] };
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + "?action=list");
+      const json = await res.json();
+      if(!json.ok) throw new Error(json.error || "resposta inválida");
+      const entries = (json.entries || []).map(r => {
+        const parsedTs = r["Registrado em"] ? new Date(r["Registrado em"]).getTime() : NaN;
+        return {
+          vendedor: String(r["Vendedor"] || "").trim(), data: normData(r["Data"]), cidade: canonCidade(r["Cidade"]),
+          estado: String(r["Estado"] || "").trim(), tipo: String(r["Tipo"] || "").trim(), segmento: String(r["Segmento"] || "").trim(),
+          origem: String(r["Origem"] || "").trim(), produto: String(r["Produto"] || "").trim(),
+          valor: (parseValor(r["Valor"]) !== null) ? fmtBRL(parseValor(r["Valor"])) : String(r["Valor"] || ""),
+          faixa: String(r["Faixa"] || "").trim(),
+          pedido: String(r["Pedido"] == null ? "" : r["Pedido"]).trim(),
+          ts: isNaN(parsedTs) ? Date.now() : parsedTs
+        };
+      }).reverse(); // a planilha guarda em ordem de chegada; o app espera mais recente primeiro
+      return { summary: computeSummaryFromEntries(entries), entries };
+    }catch(e){
+      console.error("falha ao carregar da planilha", e);
+      return { summary: emptySummary(), entries: [], erro: true };
+    }
+  }
+
+  // Envia UMA venda para a planilha (cada venda vira uma linha nova, sem sobrescrever nada).
+  async function saveEntryRemote(entry, attempts){
+    if(!isConfigured()) return false;
+    attempts = attempts || 3;
+    for(let i=0;i<attempts;i++){
+      try{
+        const res = await fetch(APPS_SCRIPT_URL, { method:"POST", body:JSON.stringify(entry) });
+        const json = await res.json();
+        if(json.ok) return true;
+      }catch(e){ /* tenta de novo abaixo */ }
+      if(i < attempts-1) await new Promise(r=>setTimeout(r, 500*(i+1)));
+    }
+    return false;
+  }
+
+  // ---------------- Validation ----------------
+  function setError(fieldId, show){
+    const el = $(fieldId);
+    if(el) el.classList.toggle("has-error", !!show);
+  }
+
+  function validate(){
+    let ok = true;
+    const vendedor = $("vendedor").value.trim();
+    const cidade = $("cidade").value.trim();
+    const data = $("data").value;
+    const estado = $("estado").value;
+    const segmento = $("segmento").value;
+    const origem = $("origem").value;
+    const produto = $("produto").value;
+
+    setError("f-vendedor", !vendedor); if(!vendedor) ok = false;
+    setError("f-cidade", !cidade); if(!cidade) ok = false;
+    setError("f-data", !data); if(!data) ok = false;
+    setError("f-estado", !estado); if(!estado) ok = false;
+    setError("f-segmento", !segmento); if(!segmento) ok = false;
+    setError("f-origem", !origem); if(!origem) ok = false;
+    setError("f-produto", !produto); if(!produto) ok = false;
+    setError("f-valor", valorNumerico === null || valorNumerico <= 0); if(valorNumerico === null || valorNumerico <= 0) ok = false;
+    setError("f-tipo", !tipoSelecionado); if(!tipoSelecionado) ok = false;
+    setError("f-faixa", !faixaSelecionada); if(!faixaSelecionada) ok = false;
+
+    if(!ok){
+      const firstError = document.querySelector(".field.has-error");
+      if(firstError) firstError.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+
+    return ok;
+  }
+
+  // ---------------- Submit ----------------
+  let lastVendorName = "";
+  let currentEntry = null; // venda em revisão, ainda não enviada
+
+  function fmtCampo(entry){
+    return [
+      ["Vendedor", entry.vendedor],
+      ["Data", entry.data],
+      ["Nº do pedido", entry.pedido || "—"],
+      ["Cidade", entry.cidade],
+      ["Cliente", entry.tipo],
+      ["Estado", entry.estado],
+      ["Segmento", entry.segmento],
+      ["Origem", entry.origem],
+      ["Produto", entry.produto],
+      ["Valor da venda", entry.valor],
+      ["Faixa da venda", entry.faixa]
+    ];
+  }
+
+  function openReview(entry){
+    const list = $("review-list");
+    list.innerHTML = "";
+    fmtCampo(entry).forEach(([k,v])=>{
+      const row = document.createElement("div");
+      row.className = "review-row";
+      row.innerHTML = `<span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span>`;
+      list.appendChild(row);
+    });
+    $("btn-review-send").disabled = false;
+    $("btn-review-send").textContent = "Enviar";
+    $("review-overlay").classList.add("show");
+  }
+
+  function handleSubmitClick(){
+    if(!validate()){
+      const msg = "Preencha os campos obrigatórios";
+      $("btn-submit").textContent = msg;
+      $("btn-submit-desktop").textContent = msg;
+      setTimeout(()=>{
+        $("btn-submit").textContent = "Registrar";
+        $("btn-submit-desktop").textContent = "Registrar";
+      }, 1600);
+      return;
+    }
+    currentEntry = {
+      vendedor: $("vendedor").value.trim(),
+      data: $("data").value,
+      cidade: $("cidade").value.trim(),
+      estado: $("estado").value,
+      tipo: tipoSelecionado,
+      pedido: $("pedido").value.trim(),
+      segmento: $("segmento").value,
+      origem: $("origem").value,
+      produto: $("produto").value,
+      valor: $("valor").value,
+      faixa: faixaSelecionada,
+      ts: Date.now()
+    };
+    openReview(currentEntry);
+  }
+  $("btn-submit").addEventListener("click", handleSubmitClick);
+  $("btn-submit-desktop").addEventListener("click", handleSubmitClick);
+
+  $("btn-review-back").addEventListener("click", ()=>{
+    $("review-overlay").classList.remove("show");
+  });
+
+  function openSaleDetail(entry){
+    const list = $("sale-detail-list");
+    list.innerHTML = "";
+    const campos = fmtCampo(entry).concat([["Registrado em", new Date(entry.ts).toLocaleString("pt-BR")]]);
+    campos.forEach(([k,v])=>{
+      const row = document.createElement("div");
+      row.className = "review-row";
+      row.innerHTML = `<span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span>`;
+      list.appendChild(row);
+    });
+    $("sale-detail-overlay").classList.add("show");
+  }
+  $("btn-sale-detail-close").addEventListener("click", ()=>{
+    $("sale-detail-overlay").classList.remove("show");
+  });
+  $("sale-detail-overlay").addEventListener("click", (e)=>{
+    if(e.target.id === "sale-detail-overlay") $("sale-detail-overlay").classList.remove("show");
+  });
+
+  const PERIODO_LABEL = { hoje:"Hoje", semana:"Esta semana", mes:"Este mês", "6meses":"Últimos 6 meses", "1ano":"Último 1 ano" };
+
+  let vendorDetailNome = null;
+  let vendorDetailEntries = [];
+
+  function renderListaVendas(container, entries){
+    container.innerHTML = "";
+    if(entries.length === 0){
+      container.innerHTML = '<div class="empty-state" style="padding:10px 0;">Nenhum registro encontrado.</div>';
+      return;
+    }
+    entries.forEach(entry=>{
+      const row = document.createElement("div");
+      row.className = "recent-item";
+      row.innerHTML = `
+        <div>
+          <div class="who">${escapeHtml(entry.vendedor)} — ${escapeHtml(entry.cidade)}</div>
+          <div class="meta">${escapeHtml(fmtDataBR(entry.data))} · ${escapeHtml(entry.estado)}</div>
+        </div>
+        <div class="amt">${escapeHtml(entry.tipo)}</div>
+      `;
+      row.addEventListener("click", ()=> openSaleDetail(entry));
+      container.appendChild(row);
+    });
+  }
+
+  function openVendorDetail(nome, allEntries){
+    const entriesDoVendedor = allEntries.filter(e => e.vendedor === nome);
+    const s = computeSummaryFromEntries(entriesDoVendedor);
+    vendorDetailNome = nome;
+    vendorDetailEntries = entriesDoVendedor;
+
+    $("vd-name").textContent = nome;
+    $("vd-total").textContent = s.totalCount;
+    $("vd-novos").textContent = s.tipoCount["Novo"] || 0;
+    $("vd-recorrentes").textContent = s.tipoCount["Recorrente"] || 0;
+    renderListaVendas($("vd-lista-vendas"), entriesDoVendedor);
+
+    rankRows($("vd-rank-segmento"), s.segCount, null);
+    rankRows($("vd-rank-origem"), s.oriCount, null);
+    rankRows($("vd-rank-produto"), s.prodCount, null);
+    rankRows($("vd-rank-valor"), s.faixaCount, null, {naturalOrder:true});
+    rankRows($("vd-rank-cidade"), s.cidadeCount, null, {limit:10});
+    rankRows($("vd-rank-estado"), s.estadoCount, null);
+
+    $("vendor-detail-overlay").classList.add("show");
+  }
+  $("btn-vendor-detail-close").addEventListener("click", ()=>{
+    $("vendor-detail-overlay").classList.remove("show");
+  });
+
+  function openSegmentoDetail(segmento, allEntries){
+    const entriesDoSegmento = allEntries.filter(e => e.segmento === segmento);
+    const s = computeSummaryFromEntries(entriesDoSegmento);
+
+    $("sd-name").textContent = segmento;
+    $("sd-total").textContent = s.totalCount;
+    $("sd-novos").textContent = s.tipoCount["Novo"] || 0;
+    $("sd-recorrentes").textContent = s.tipoCount["Recorrente"] || 0;
+    renderListaVendas($("sd-lista-vendas"), entriesDoSegmento);
+
+    rankRows($("sd-rank-vendedor"), s.vendedorCount, null);
+    rankRows($("sd-rank-origem"), s.oriCount, null);
+    rankRows($("sd-rank-produto"), s.prodCount, null);
+    rankRows($("sd-rank-valor"), s.faixaCount, null, {naturalOrder:true});
+    rankRows($("sd-rank-cidade"), s.cidadeCount, null, {limit:10});
+    rankRows($("sd-rank-estado"), s.estadoCount, null);
+
+    $("segmento-detail-overlay").classList.add("show");
+  }
+  $("btn-segmento-detail-close").addEventListener("click", ()=>{
+    $("segmento-detail-overlay").classList.remove("show");
+  });
+  $("segmento-detail-overlay").addEventListener("click", (e)=>{
+    if(e.target.id === "segmento-detail-overlay") $("segmento-detail-overlay").classList.remove("show");
+  });
+
+  function formatarSecaoTexto(countMap, revenueMap, opts){
+    opts = opts || {};
+    const showRevenue = !!revenueMap;
+    let items = Object.keys(countMap).map(k => ({name:k, count: countMap[k]||0, revenue: (revenueMap?revenueMap[k]:0)||0}));
+    if(!opts.showAll) items = items.filter(it=>it.count>0);
+    if(!opts.naturalOrder) items = items.sort((a,b)=> showRevenue ? b.revenue-a.revenue : b.count-a.count);
+    if(items.length === 0) return "  (sem registros)";
+    return items.map(it=>{
+      const qtd = it.count + (it.count===1 ? " registro" : " registros");
+      const val = showRevenue ? (qtd + " · " + fmtBRL(it.revenue)) : qtd;
+      return "  " + it.name + ": " + val;
+    }).join("\n");
+  }
+
+  function buildVendorTextReport(nome, periodoLabel, s){
+    return [
+      "RELATÓRIO DE REGISTROS — " + nome,
+      "Período: " + periodoLabel,
+      "Gerado em: " + new Date().toLocaleString("pt-BR"),
+      "",
+      "RESUMO",
+      "Total de registros: " + s.totalCount,
+      "Novos: " + (s.tipoCount["Novo"] || 0),
+      "Recorrentes: " + (s.tipoCount["Recorrente"] || 0),
+      "",
+      "SEGMENTO",
+      formatarSecaoTexto(s.segCount),
+      "",
+      "ORIGEM",
+      formatarSecaoTexto(s.oriCount),
+      "",
+      "PRODUTO DE INTERESSE",
+      formatarSecaoTexto(s.prodCount),
+      "",
+      "FAIXA DA VENDA",
+      formatarSecaoTexto(s.faixaCount, null, {naturalOrder:true}),
+      "",
+      "TOTAL VENDIDO",
+      "R$ " + s.valorTotal.toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2}),
+      "",
+      "CIDADE",
+      formatarSecaoTexto(s.cidadeCount),
+      "",
+      "ESTADO",
+      formatarSecaoTexto(s.estadoCount),
+    ].join("\n");
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  $("btn-vendor-export-txt").addEventListener("click", ()=>{
+    if(!vendorDetailNome) return;
+    const s = computeSummaryFromEntries(vendorDetailEntries);
+    const periodoLabel = PERIODO_LABEL[periodoSelecionado] || periodoSelecionado;
+    const texto = buildVendorTextReport(vendorDetailNome, periodoLabel, s);
+    downloadText(texto, "relatorio-" + vendorDetailNome.replace(/\s+/g,"-") + "-" + todayIsoCompact() + ".txt");
+  });
+
+  $("btn-vendor-export-csv").addEventListener("click", ()=>{
+    if(!vendorDetailNome) return;
+    const entriesOrdenadas = vendorDetailEntries.slice().reverse();
+    downloadCSV(entriesToCSV(entriesOrdenadas), "registros-" + vendorDetailNome.replace(/\s+/g,"-") + "-" + todayIsoCompact() + ".csv");
+  });
+
+  $("vendor-detail-overlay").addEventListener("click", (e)=>{
+    if(e.target.id === "vendor-detail-overlay") $("vendor-detail-overlay").classList.remove("show");
+  });
+
+  $("btn-review-send").addEventListener("click", async ()=>{
+    if(!currentEntry) return;
+    const entry = currentEntry;
+    currentEntry = null;
+
+    $("btn-review-send").disabled = true;
+    $("btn-review-send").textContent = "Enviando...";
+
+    // tenta gravar na planilha (com tentativas automáticas)
+    const ok = await saveEntryRemote(entry);
+
+    $("review-overlay").classList.remove("show");
+    $("btn-review-send").disabled = false;
+    $("btn-review-send").textContent = "Enviar";
+
+    if(ok){
+      lastVendorName = entry.vendedor;
+      showSuccessStamp(entry);
+    } else {
+      showFailureStamp(entry);
+    }
+  });
+
+  function showSuccessStamp(entry){
+    const box = $("stamp-box");
+    box.classList.remove("fail");
+    $("stamp-title").textContent = "REGISTRADO";
+    $("stamp-detail").textContent = entry.cidade + " · " + entry.segmento;
+    $("stamp-note").style.display = "none";
+    $("btn-stamp-ok").style.display = "none";
+    const overlay = $("confirm-overlay");
+    overlay.classList.add("show");
+    setTimeout(()=>{
+      overlay.classList.remove("show");
+      resetForm();
+    }, 1300);
+  }
+
+  function showFailureStamp(entry){
+    const box = $("stamp-box");
+    box.classList.add("fail");
+    $("stamp-title").textContent = "⚠️ NÃO FOI SALVO";
+    $("stamp-detail").textContent = entry.cidade + " · " + entry.segmento;
+    $("stamp-note").textContent = "Sem conexão com a planilha. Os dados continuam preenchidos no formulário — toque em \"Registrar\" de novo assim que tiver sinal.";
+    $("stamp-note").style.display = "block";
+    $("btn-stamp-ok").style.display = "inline-block";
+    $("confirm-overlay").classList.add("show");
+    // NÃO reseta o formulário: os dados ficam preenchidos para nova tentativa manual
+  }
+  $("btn-stamp-ok").addEventListener("click", ()=>{
+    $("confirm-overlay").classList.remove("show");
+  });
+
+  function resetForm(){
+    $("cidade").value = "";
+    $("pedido").value = "";
+    $("estado").selectedIndex = 0;
+    $("segmento").selectedIndex = 0;
+    $("origem").selectedIndex = 0;
+    $("produto").selectedIndex = 0;
+    $("valor").value = "";
+    tipoSelecionado = null;
+    faixaSelecionada = null;
+    valorNumerico = null;
+    document.querySelectorAll("#toggle-tipo .toggle-btn").forEach(b=>b.classList.remove("selected"));
+    document.querySelectorAll("#toggle-faixa .toggle-btn").forEach(b=>b.classList.remove("selected"));
+    $("vendedor").value = lastVendorName;
+    document.querySelectorAll(".field").forEach(f=>f.classList.remove("has-error"));
+    $("btn-submit").disabled = false;
+    $("btn-submit").textContent = "Registrar";
+    $("btn-submit-desktop").disabled = false;
+    $("btn-submit-desktop").textContent = "Registrar";
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  // ---------------- Dashboard rendering ----------------
+  function rankRows(container, countMap, revenueMap, opts){
+    opts = opts || {};
+    const showRevenue = !!revenueMap;
+    let items = Object.keys(countMap)
+      .map(k => ({name:k, count: countMap[k]||0, revenue: (revenueMap ? revenueMap[k] : 0) || 0}));
+    if(!opts.showAll) items = items.filter(it => it.count > 0);
+    if(!opts.naturalOrder){
+      items = items.sort((a,b)=> showRevenue ? (b.revenue - a.revenue) : (b.count - a.count));
+    }
+    const totalItems = items.length;
+    if(opts.limit) items = items.slice(0, opts.limit);
+
+    container.innerHTML = "";
+    if(items.length === 0){
+      container.innerHTML = '<div class="empty-state" style="padding:14px 0;">Sem vendas registradas ainda nesta categoria.</div>';
+      return null;
+    }
+    const maxVal = Math.max(1, ...items.map(it => showRevenue ? it.revenue : it.count));
+    items.forEach(it=>{
+      const row = document.createElement("div");
+      row.className = "rank-item";
+      const qtdTxt = it.count + (it.count === 1 ? " registro" : " registros");
+      const valText = showRevenue ? (qtdTxt + " · " + fmtBRLShort(it.revenue)) : qtdTxt;
+      const barVal = showRevenue ? it.revenue : it.count;
+      row.innerHTML = `
+        <div class="rank-top"><span class="name">${escapeHtml(it.name)}</span><span class="val">${valText}</span></div>
+        <div class="rank-bar"><div style="width:${Math.max(4, (barVal/maxVal)*100)}%"></div></div>
+      `;
+      if(opts.onClick){
+        row.style.cursor = "pointer";
+        row.addEventListener("click", ()=> opts.onClick(it.name));
+      }
+      container.appendChild(row);
+    });
+    if(opts.limit && totalItems > opts.limit){
+      const more = document.createElement("div");
+      more.className = "hint";
+      more.style.marginTop = "8px";
+      more.textContent = "+ " + (totalItems - opts.limit) + " outro" + (totalItems - opts.limit === 1 ? "" : "s") + " item" + (totalItems - opts.limit === 1 ? "" : "s") + " com vendas";
+      container.appendChild(more);
+    }
+    return items.slice().sort((a,b)=>b.revenue-a.revenue)[0];
+  }
+
+  function timeAgo(ts){
+    const diff = Math.max(0, Date.now() - ts);
+    const mins = Math.floor(diff/60000);
+    if(mins < 1) return "agora mesmo";
+    if(mins < 60) return mins + " min atrás";
+    const hrs = Math.floor(mins/60);
+    if(hrs < 24) return hrs + "h atrás";
+    return Math.floor(hrs/24) + "d atrás";
+  }
+
+  // =====================================================================
+  //  PAINEL v2 — filtros que cruzam tudo, comparação com período anterior,
+  //  matrizes de cruzamento, comparativo de vendedores e detalhamento.
+  // =====================================================================
+  const DIAS_SEMANA = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+  const DIAS_ORDEM = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+  const PALETA = ["#A9C348","#302F2B","#5B8DB8","#E0A030","#C1623B","#7A6BA8","#4FA58A","#B8B2A2"];
+  const PREV_LABEL = {
+    hoje:"ontem até agora", semana:"semana passada até agora", mes:"mês passado até o mesmo ponto",
+    "6meses":"os 6 meses anteriores", "1ano":"o ano anterior"
+  };
+
+  const esc = escapeHtml;
+  const pct = (n, total) => total > 0 ? Math.round(n / total * 100) : 0;
+
+  // Converte o texto/número da coluna "Valor" em número. Devolve null para
+  // registros antigos (texto de faixa) ou vazios, que ficam fora dos totais.
+  function parseValor(v){
+    if(v === null || v === undefined || v === "") return null;
+    if(typeof v === "number") return (isFinite(v) && v > 0) ? v : null;
+    let s = String(v).trim().replace(/^R\$\s*/i, "");
+    if(!s || !/^[\d.,\s]+$/.test(s)) return null;
+    s = s.replace(/\s/g, "");
+    if(s.indexOf(",") >= 0) s = s.replace(/\./g, "").replace(",", ".");
+    else if((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, "");
+    else if(/^\d{1,3}\.\d{3}$/.test(s)) s = s.replace(".", "");
+    const n = parseFloat(s);
+    return (isFinite(n) && n > 0) ? n : null;
+  }
+  function vOf(e){
+    if(e._v === undefined) e._v = parseValor(e.valor);
+    return e._v;
+  }
+
+  // Data da venda: aceita "2026-08-13", ISO completo ("2026-08-13T03:00:00.000Z") e "13/08/2026".
+  function normData(d){
+    if(d === null || d === undefined) return "";
+    const s = String(d).trim();
+    let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return m[1] + "-" + m[2] + "-" + m[3];
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m) return m[3] + "-" + m[2].padStart(2,"0") + "-" + m[1].padStart(2,"0");
+    return s;
+  }
+
+  // Cidade digitada à mão: junta variações de maiúscula/acento com a grafia oficial da lista.
+  const semAcento = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const CIDADES_CANON = new Map(CIDADES.map(c => [semAcento(c), c]));
+  function canonCidade(c){
+    const limpa = String(c == null ? "" : c).trim().replace(/\s+/g, " ");
+    return CIDADES_CANON.get(semAcento(limpa)) || limpa;
+  }
+
+  // ---------- dimensões (eixos de análise) ----------
+  const DIMS = [
+    { key:"vendedor", label:"Vendedor", get:e => e.vendedor },
+    { key:"segmento", label:"Segmento", get:e => e.segmento },
+    { key:"origem",   label:"Origem",   get:e => e.origem },
+    { key:"produto",  label:"Produto",  get:e => e.produto },
+    { key:"faixa",    label:"Faixa da venda", get:e => e.faixa, order:FAIXAS },
+    { key:"tipo",     label:"Cliente",  get:e => e.tipo, order:["Novo","Recorrente"] },
+    { key:"estado",   label:"Estado",   get:e => e.estado, many:true },
+    { key:"cidade",   label:"Cidade",   get:e => e.cidade, many:true },
+    { key:"dia",      label:"Dia da semana", get:e => DIAS_SEMANA[new Date(e.ts).getDay()], order:DIAS_ORDEM },
+    { key:"mes",      label:"Mês", chrono:true, hideCard:true,
+      get:e => { const d = new Date(e.ts); return MESES_ABREV[d.getMonth()] + "/" + String(d.getFullYear()).slice(2); } }
+  ];
+  const dimOf = k => DIMS.find(d => d.key === k);
+  const MIX_DIMS = ["segmento","origem","produto","faixa","tipo","estado","dia"];
+  const PRESETS = [
+    ["vendedor","segmento"], ["segmento","produto"], ["origem","faixa"], ["vendedor","origem"],
+    ["estado","segmento"], ["tipo","segmento"], ["dia","vendedor"], ["mes","segmento"],
+    ["vendedor","produto"], ["origem","segmento"], ["cidade","produto"], ["vendedor","faixa"],
+    ["segmento","faixa"], ["tipo","origem"]
+  ];
+
+  // ---------- estado da interface ----------
+  const DASH = { all: [], loaded: false };
+  const LAST = { refs: [], maxE: null, recList: [] };
+  const UI = {
+    tab: "geral", showFilters: false, trendMetric: "n",
+    metric: { vendedor: "sum" }, expand: {},
+    cruz: { row: "vendedor", col: "segmento", metric: "n" },
+    mixDim: "segmento",
+    vSort: { col: "sum", dir: -1 },
+    recQ: "", recSort: "recentes", recLimit: 20
+  };
+  const filtros = {};
+  DIMS.forEach(d => { filtros[d.key] = new Set(); });
+  const temFiltro = () => DIMS.some(d => filtros[d.key].size > 0);
+  // Um registro passa se casar com todos os filtros (OU dentro de um eixo, E entre eixos).
+  // "ignorar" permite mostrar as alternativas do próprio eixo (filtro facetado).
+  function passa(e, ignorar){
+    for(let i = 0; i < DIMS.length; i++){
+      const d = DIMS[i];
+      if(d.key === ignorar) continue;
+      const s = filtros[d.key];
+      if(s.size > 0 && !s.has(d.get(e))) return false;
+    }
+    return true;
+  }
+  function pushRef(title, ents){
+    LAST.refs.push({ title: title, ents: ents });
+    return LAST.refs.length - 1;
+  }
+
+  // ---------- métricas ----------
+  function agg(entries){
+    let sum = 0, nv = 0, max = 0, maxE = null, rec = 0;
+    entries.forEach(e => {
+      const v = vOf(e);
+      if(v !== null){ sum += v; nv++; if(v > max){ max = v; maxE = e; } }
+      if(e.tipo === "Recorrente") rec++;
+    });
+    const n = entries.length;
+    return { n: n, sum: sum, nv: nv, ticket: nv ? sum / nv : 0, max: max, maxE: maxE, rec: rec, recPct: n ? rec / n * 100 : 0 };
+  }
+  const metricVal = (r, m) => m === "sum" ? r.sum : m === "ticket" ? r.ticket : r.n;
+  const METRIC_LABEL = { n:"Registros", sum:"Vendido", ticket:"Ticket médio", pct:"% da linha" };
+
+  function rows(entries, dim){
+    const map = new Map();
+    entries.forEach(e => {
+      const k = dim.get(e);
+      if(k === "" || k === null || k === undefined) return;
+      if(!map.has(k)) map.set(k, []);
+      map.get(k).push(e);
+    });
+    const out = Array.from(map, ([name, ents]) => Object.assign({ name: name, ents: ents }, agg(ents)));
+    if(dim.order){
+      const idx = v => { const i = dim.order.indexOf(v); return i < 0 ? 999 : i; };
+      out.sort((a, b) => idx(a.name) - idx(b.name));
+    } else if(dim.chrono){
+      const first = r => Math.min.apply(null, r.ents.map(e => e.ts));
+      out.sort((a, b) => first(a) - first(b));
+    }
+    return out;
+  }
+  const isNatural = d => !!(d.order || d.chrono);
+  const emptyRow = name => Object.assign({ name: name, ents: [] }, agg([]));
+
+  // ---------- formatação ----------
+  function fmtCompacto(n){
+    n = Number(n) || 0;
+    if(n >= 1e6) return "R$ " + (n / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mi";
+    if(n >= 1e4) return "R$ " + Math.round(n / 1e3).toLocaleString("pt-BR") + " mil";
+    if(n >= 1e3) return "R$ " + (n / 1e3).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mil";
+    return "R$ " + Math.round(n).toLocaleString("pt-BR");
+  }
+  function deltaBadge(cur, prev, pontos){
+    if(!cur && !prev) return { cls: "flat", txt: "sem base" };
+    if(pontos){
+      const d = cur - prev;
+      if(Math.abs(d) < 0.5) return { cls: "flat", txt: "= igual" };
+      return { cls: d > 0 ? "up" : "down", txt: (d > 0 ? "▲ " : "▼ ") + Math.abs(Math.round(d)) + " p.p." };
+    }
+    if(!prev) return { cls: "up", txt: "novo" };
+    const p = (cur - prev) / prev * 100;
+    if(Math.abs(p) < 0.5) return { cls: "flat", txt: "= igual" };
+    return { cls: p > 0 ? "up" : "down", txt: (p > 0 ? "▲ " : "▼ ") + Math.abs(Math.round(p)) + "%" };
+  }
+  function janelaAnterior(periodo){
+    const ini = inicioDoPeriodo(periodo);
+    const dur = Date.now() - ini.getTime();
+    let pIni;
+    if(periodo === "hoje") pIni = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() - 1);
+    else if(periodo === "semana") pIni = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() - 7);
+    else if(periodo === "mes") pIni = new Date(ini.getFullYear(), ini.getMonth() - 1, 1);
+    else pIni = new Date(ini.getTime() - dur);
+    return { pIni: pIni.getTime(), pFim: Math.min(pIni.getTime() + dur, ini.getTime()) };
+  }
+
+  // ---------- evolução no tempo ----------
+  function bucketStart(d, gran){
+    if(gran === "hora") return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours());
+    if(gran === "dia") return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    if(gran === "semana") return new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+  function bucketNext(d, gran){
+    if(gran === "hora") return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1);
+    if(gran === "dia") return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    if(gran === "semana") return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7);
+    return new Date(d.getFullYear(), d.getMonth() + 1, 1);
+  }
+  function bucketLabel(d, gran){
+    if(gran === "hora") return d.getHours() + "h";
+    if(gran === "mes") return MESES_ABREV[d.getMonth()] + "/" + String(d.getFullYear()).slice(2);
+    return d.getDate() + "/" + (d.getMonth() + 1);
+  }
+  function computeTrend(entries, periodo){
+    const ini = inicioDoPeriodo(periodo), fim = new Date();
+    const span = Math.max(0.1, (fim - ini) / 86400000);
+    const gran = span <= 1.5 ? "hora" : span <= 35 ? "dia" : span <= 100 ? "semana" : "mes";
+    const map = new Map();
+    let cur = bucketStart(ini, gran), guard = 0;
+    while(cur <= fim && guard++ < 500){
+      map.set(cur.getTime(), { label: bucketLabel(cur, gran), ents: [] });
+      cur = bucketNext(cur, gran);
+    }
+    entries.forEach(e => {
+      const b = map.get(bucketStart(new Date(e.ts), gran).getTime());
+      if(b) b.ents.push(e);
+    });
+    return { gran: gran, buckets: Array.from(map.values()) };
+  }
+  const GRAN_LABEL = { hora:"por hora", dia:"por dia", semana:"por semana", mes:"por mês" };
+
+  function renderTrend(trend, metric){
+    const box = $("chart-trend");
+    const vals = trend.buckets.map(b => metric === "sum" ? agg(b.ents).sum : b.ents.length);
+    const max = Math.max.apply(null, vals.concat([0]));
+    $("trend-title").textContent = (metric === "sum" ? "Vendido " : "Registros ") + GRAN_LABEL[trend.gran];
+    document.querySelectorAll("#trend-seg button").forEach(b => b.classList.toggle("on", b.dataset.m === metric));
+    if(max <= 0){
+      box.innerHTML = '<div class="empty-state" style="padding:14px 0;">' +
+        (metric === "sum" ? "Nenhuma venda com valor neste recorte." : "Sem registros neste recorte.") + '</div>';
+      return;
+    }
+    const n = vals.length, showVal = n <= 16, step = n <= 16 ? 1 : Math.ceil(n / 10), H = 110;
+    const bars = trend.buckets.map((b, i) => {
+      const v = vals[i];
+      const h = v > 0 ? Math.max(4, Math.round(v / max * H)) : 2;
+      const ref = v > 0 ? pushRef("Registros — " + b.label, b.ents) : null;
+      const txt = metric === "sum" ? fmtCompacto(v).replace("R$ ", "") : String(v);
+      const tip = b.label + ": " + (metric === "sum" ? fmtBRL(v) : v + (v === 1 ? " registro" : " registros"));
+      return '<div class="tb' + (v === max ? " best" : "") + '"' +
+        (ref !== null ? ' data-act="drill" data-ref="' + ref + '" role="button" tabindex="0"' : "") +
+        ' title="' + esc(tip) + '">' +
+        '<div class="tcol">' + (showVal && v > 0 ? '<span class="tv">' + esc(txt) + '</span>' : "") +
+        '<div class="tbar" style="height:' + h + 'px"></div></div>' +
+        '<span class="tl">' + (i % step === 0 ? esc(b.label) : "") + '</span></div>';
+    }).join("");
+    const total = vals.reduce((a, b) => a + b, 0);
+    const best = trend.buckets[vals.indexOf(max)];
+    box.innerHTML = '<div class="tbars">' + bars + '</div>' +
+      '<div class="hint" style="margin-top:8px;">' +
+      (metric === "sum" ? "Total: " + fmtBRL(total) : "Total: " + total + (total === 1 ? " registro" : " registros")) +
+      ' · Pico: <b>' + esc(best.label) + '</b> · toque numa barra para ver os registros</div>';
+  }
+
+  // ---------- faixa de filtros ----------
+  function renderFilterBar(baseP){
+    const chips = [];
+    DIMS.forEach(d => filtros[d.key].forEach(v => {
+      chips.push('<button type="button" class="chip chip-signal" data-act="filter" data-dim="' + d.key +
+        '" data-val="' + esc(v) + '" title="Remover filtro">' + esc(d.label) + ': <b>' + esc(v) + '</b> <span class="x">✕</span></button>');
+    }));
+    $("active-chips").innerHTML = chips.join("");
+    const nF = chips.length;
+    $("filter-count").textContent = nF ? String(nF) : "";
+    $("filter-count").style.display = nF ? "" : "none";
+    $("btn-clear-filters").style.display = nF ? "" : "none";
+    $("btn-toggle-filters").classList.toggle("on", UI.showFilters);
+    $("btn-toggle-filters").setAttribute("aria-expanded", UI.showFilters ? "true" : "false");
+    const panel = $("filters-panel");
+    panel.style.display = UI.showFilters ? "block" : "none";
+    if(!UI.showFilters) return;
+    panel.innerHTML = '<div class="hint" style="margin:0 0 12px;">Escolha um ou mais valores. Tudo no painel (números, gráficos e cruzamentos) se ajusta ao seu recorte.</div>' +
+      DIMS.filter(d => !d.hideCard).map(d => {
+        let rs = rows(baseP.filter(e => passa(e, d.key)), d);
+        if(!isNatural(d)) rs.sort((a, b) => b.n - a.n);
+        let vals = rs.map(r => ({ name: r.name, n: r.n }));
+        if(d.many) vals = vals.filter((v, i) => i < 14 || filtros[d.key].has(v.name));
+        filtros[d.key].forEach(v => { if(!vals.some(x => x.name === v)) vals.push({ name: v, n: 0 }); });
+        if(!vals.length) return "";
+        return '<div class="fp-group"><div class="fp-label">' + esc(d.label) + '</div><div class="chips-wrap">' +
+          vals.map(v => '<button type="button" class="chip' + (filtros[d.key].has(v.name) ? " on" : "") +
+            '" data-act="filter" data-dim="' + d.key + '" data-val="' + esc(v.name) + '">' + esc(v.name) +
+            ' <span class="cnt">' + v.n + '</span></button>').join("") + '</div></div>';
+      }).join("");
+  }
+  function toggleFiltro(dimKey, val){
+    const s = filtros[dimKey];
+    if(!s) return;
+    if(s.has(val)) s.delete(val); else s.add(val);
+    UI.recLimit = 20;
+    renderDashboard();
+  }
+  function limparFiltros(){
+    DIMS.forEach(d => filtros[d.key].clear());
+    UI.recLimit = 20;
+    renderDashboard();
+  }
+
+  // ---------- KPIs ----------
+  function renderKPIs(cur, prev){
+    const a = agg(cur), b = agg(prev);
+    LAST.maxE = a.maxE;
+    const cid = new Set(cur.map(e => e.cidade).filter(Boolean));
+    const cidP = new Set(prev.map(e => e.cidade).filter(Boolean));
+    const est = new Set(cur.map(e => e.estado).filter(Boolean));
+    const semValor = a.n - a.nv;
+    const items = [
+      { id:"total", label:"Registros", value:String(a.n), dark:false, d:deltaBadge(a.n, b.n),
+        sub: semValor > 0 ? semValor + " sem valor" : "contatos no período" },
+      { id:"total-vendido", k:"vendido", label:"Total vendido", value:fmtBRL(a.sum), dark:true, d:deltaBadge(a.sum, b.sum),
+        sub: a.nv + (a.nv === 1 ? " venda com valor" : " vendas com valor") },
+      { id:"ticket-medio", k:"ticket", label:"Ticket médio", value:fmtBRL(a.ticket), dark:true, d:deltaBadge(a.ticket, b.ticket),
+        sub: "por venda com valor" },
+      { id:"maior-venda", k:"maior", label:"Maior venda", value:fmtBRL(a.max), dark:false, d:deltaBadge(a.max, b.max),
+        sub: a.maxE ? (a.maxE.vendedor + " · " + a.maxE.cidade) : "—" },
+      { id:"recorrentes", k:"rec", label:"Recorrentes", value:Math.round(a.recPct) + "%", dark:false, d:deltaBadge(a.recPct, b.recPct, true),
+        sub: a.rec + " de " + a.n + " clientes" },
+      { id:"cidades", k:"cidades", label:"Cidades", value:String(cid.size), dark:false, d:deltaBadge(cid.size, cidP.size),
+        sub: est.size + (est.size === 1 ? " estado" : " estados") }
+    ];
+    $("kpi-grid").innerHTML = items.map(it =>
+      '<button type="button" class="kpi' + (it.dark ? " dark" : "") + '" data-act="kpi" data-k="' + (it.k || it.id) + '">' +
+      '<div class="label">' + it.label + '</div>' +
+      '<div class="value" id="stat-' + it.id + '">' + esc(it.value) + '</div>' +
+      '<span class="delta ' + it.d.cls + '">' + it.d.txt + '</span>' +
+      '<div class="sub">' + esc(it.sub) + '</div></button>'
+    ).join("") + '<div class="kpi-hint">▲▼ comparado com ' + PREV_LABEL[periodoSelecionado] + '. Toque num cartão para explorar.</div>';
+  }
+  function setTab(t, rolar){
+    UI.tab = t;
+    renderDashboard();
+    if(rolar && $("dash-tabs").scrollIntoView) $("dash-tabs").scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  function onKpi(k){
+    if(k === "total") setTab("reg", true);
+    else if(k === "vendido") setTab("pessoas", true);
+    else if(k === "ticket"){ UI.cruz.metric = "ticket"; setTab("cruz", true); }
+    else if(k === "maior"){ if(LAST.maxE) openSaleDetail(LAST.maxE); }
+    else if(k === "rec") toggleFiltro("tipo", "Recorrente");
+    else if(k === "cidades"){ UI.expand.cidade = true; setTab("geral", true); }
+  }
+
+  // ---------- insights automáticos ----------
+  function buildInsights(cur, prev){
+    const out = [];
+    if(!cur.length) return out;
+    const a = agg(cur), b = agg(prev);
+    const top = (dimKey, m, min) => {
+      const rs = rows(cur, dimOf(dimKey)).filter(r => (min ? r.nv >= min : true) && metricVal(r, m) > 0);
+      rs.sort((x, y) => metricVal(y, m) - metricVal(x, m));
+      return rs[0] || null;
+    };
+    const act = (dim, val) => ({ dim: dim, val: val });
+    if(b.sum > 0 && a.sum > 0){
+      const p = Math.round((a.sum - b.sum) / b.sum * 100);
+      out.push({ html: "💰 O faturamento está <b>" + (p >= 0 ? "▲ " : "▼ ") + Math.abs(p) + "%</b> em relação a " + PREV_LABEL[periodoSelecionado] + " (" + fmtBRLShort(b.sum) + " → " + fmtBRLShort(a.sum) + ")." });
+    }
+    const v = top("vendedor", "sum");
+    if(v) out.push({ html: "🏆 <b>" + esc(v.name) + "</b> lidera o faturamento: " + fmtBRL(v.sum) + " (" + pct(v.sum, a.sum) + "% do total).", a: act("vendedor", v.name) });
+    const s = top("segmento", "ticket", 1);
+    if(s) out.push({ html: "🎯 <b>" + esc(s.name) + "</b> tem o maior ticket médio: " + fmtBRL(s.ticket) + ".", a: act("segmento", s.name) });
+    const o = top("origem", "sum");
+    if(o) out.push({ html: "📣 <b>" + esc(o.name) + "</b> é a origem que mais gera receita (" + pct(o.sum, a.sum) + "% do faturamento).", a: act("origem", o.name) });
+    const p = top("produto", "n");
+    if(p) out.push({ html: "📦 <b>" + esc(p.name) + "</b> é o produto mais procurado: " + p.n + (p.n === 1 ? " registro" : " registros") + ".", a: act("produto", p.name) });
+    if(cur.length >= 5){
+      const d = top("dia", "n");
+      if(d) out.push({ html: "📅 <b>" + esc(d.name) + "</b> é o dia mais forte em registros (" + d.n + ").", a: act("dia", d.name) });
+    }
+    if(a.n >= 3) out.push({ html: "🔁 <b>" + Math.round(a.recPct) + "%</b> dos registros são de clientes recorrentes.", a: act("tipo", "Recorrente") });
+    const presentes = new Set(cur.map(e => e.vendedor));
+    const parados = VENDEDORES.filter(x => !presentes.has(x));
+    if(parados.length) out.push({ html: "😴 Sem registros neste recorte: <b>" + parados.map(esc).join(", ") + "</b>." });
+    if(a.n - a.nv > 0) out.push({ html: "ℹ️ " + (a.n - a.nv) + (a.n - a.nv === 1 ? " registro está" : " registros estão") + " sem valor numérico (cadastro antigo) e ficam fora do total e do ticket." });
+    return out.slice(0, 8);
+  }
+
+  // ---------- aba: visão geral ----------
+  function dimCardHtml(dim, baseP){
+    const ents = baseP.filter(e => passa(e, dim.key));
+    const m = UI.metric[dim.key] || "n";
+    let rs = rows(ents, dim);
+    filtros[dim.key].forEach(v => { if(!rs.some(r => r.name === v)) rs.push(emptyRow(v)); });
+    if(!isNatural(dim)) rs.sort((a, b) => (metricVal(b, m) - metricVal(a, m)) || (b.n - a.n));
+    const total = rs.reduce((s, r) => s + metricVal(r, m), 0);
+    const max = Math.max.apply(null, rs.map(r => metricVal(r, m)).concat([0]));
+    const LIM = 8, expanded = !!UI.expand[dim.key];
+    const shown = (dim.many && !expanded) ? rs.filter((r, i) => i < LIM || filtros[dim.key].has(r.name)) : rs;
+    const lead = rs.slice().sort((a, b) => metricVal(b, m) - metricVal(a, m))[0];
+    const seg = [["n","Qtd"], ["sum","R$"], ["ticket","Ticket"]].map(x =>
+      '<button type="button" class="' + (m === x[0] ? "on" : "") + '" data-act="metric" data-dim="' + dim.key + '" data-m="' + x[0] + '">' + x[1] + '</button>').join("");
+    let body;
+    if(!shown.length){
+      body = '<div class="empty-state" style="padding:14px 0;">Sem registros neste recorte.</div>';
+    } else {
+      body = shown.map(r => {
+        const val = metricVal(r, m);
+        const sel = filtros[dim.key].has(r.name);
+        const txt = m === "n" ? String(r.n) : (m === "sum" ? fmtBRLShort(r.sum) : fmtBRLShort(r.ticket));
+        const share = m === "ticket" ? "" : " · " + pct(val, total) + "%";
+        const ref = r.ents.length ? pushRef(dim.label + ": " + r.name, r.ents) : null;
+        return '<div class="rk' + (sel ? " sel" : "") + '" role="button" tabindex="0" aria-pressed="' + sel + '" data-act="filter" data-dim="' + dim.key + '" data-val="' + esc(r.name) + '">' +
+          '<div class="rk-top"><span class="name">' + (sel ? "✓ " : "") + esc(r.name) + '</span><span class="val">' + esc(txt + share) + '</span></div>' +
+          '<div class="rk-barrow"><div class="rk-bar"><div style="width:' + (val > 0 ? Math.max(4, val / max * 100) : 0) + '%"></div></div>' +
+          (ref !== null ? '<button type="button" class="rk-det" data-act="drill" data-ref="' + ref + '" aria-label="Ver registros de ' + esc(r.name) + '" title="Ver registros">🔍</button>' : "") +
+          '</div></div>';
+      }).join("");
+      if(dim.many && rs.length > LIM){
+        body += '<button type="button" class="more" data-act="expand" data-dim="' + dim.key + '">' + (expanded ? "Mostrar menos" : "Ver todas (" + rs.length + ")") + '</button>';
+      }
+      if(lead && metricVal(lead, m) > 0){
+        body += '<div class="champion">🏆 <span><span class="k">Destaque:</span> ' + esc(lead.name) + '</span></div>';
+      }
+    }
+    return '<div class="card" id="rank-' + dim.key + '"><div class="card-head"><div class="section-label">' + esc(dim.label) + '</div><div class="seg">' + seg + '</div></div>' + body + '</div>';
+  }
+  function renderGeral(baseP, cur, prev){
+    const ins = buildInsights(cur, prev);
+    $("insights").innerHTML = ins.length ? ins.map(i => {
+      if(!i.a) return '<div class="insight static"><span>' + i.html + '</span></div>';
+      return '<button type="button" class="insight" data-act="filter" data-dim="' + i.a.dim + '" data-val="' + esc(i.a.val) + '">' +
+        '<span>' + i.html + '</span><span class="go">filtrar ›</span></button>';
+    }).join("") : '<div class="empty-state" style="padding:12px 0;">Sem registros para analisar neste recorte.</div>';
+    renderTrend(computeTrend(cur, periodoSelecionado), UI.trendMetric);
+    $("dim-grid").innerHTML = DIMS.filter(d => !d.hideCard).map(d => dimCardHtml(d, baseP)).join("");
+  }
+
+  // ---------- aba: cruzamentos ----------
+  function limitGroups(rs, max){
+    if(rs.length <= max) return { list: rs, overflow: [] };
+    const keep = new Set(rs.slice().sort((a, b) => b.n - a.n).slice(0, max).map(r => r.name));
+    return { list: rs.filter(r => keep.has(r.name)), overflow: rs.filter(r => !keep.has(r.name)) };
+  }
+  function pushTo(map, k, e){
+    if(!map.has(k)) map.set(k, []);
+    map.get(k).push(e);
+  }
+  function renderCruz(cur){
+    const rd = dimOf(UI.cruz.row), cd = dimOf(UI.cruz.col), m = UI.cruz.metric;
+    $("cruz-presets").innerHTML = PRESETS.map(p => {
+      const on = p[0] === UI.cruz.row && p[1] === UI.cruz.col;
+      return '<button type="button" class="chip' + (on ? " on" : "") + '" data-act="preset" data-r="' + p[0] + '" data-c="' + p[1] + '">' +
+        esc(dimOf(p[0]).label) + ' × ' + esc(dimOf(p[1]).label) + '</button>';
+    }).join("");
+    if($("cruz-row").value !== UI.cruz.row) $("cruz-row").value = UI.cruz.row;
+    if($("cruz-col").value !== UI.cruz.col) $("cruz-col").value = UI.cruz.col;
+    $("cruz-metric").innerHTML = ["n","sum","ticket","pct"].map(k =>
+      '<button type="button" class="' + (m === k ? "on" : "") + '" data-act="cmetric" data-m="' + k + '">' + METRIC_LABEL[k] + '</button>').join("");
+
+    const sortG = (rs, d) => { if(!isNatural(d)) rs.sort((a, b) => b.n - a.n); return rs; };
+    const R = limitGroups(sortG(rows(cur, rd), rd), 12);
+    const C = limitGroups(sortG(rows(cur, cd), cd), 8);
+    if(!R.list.length || !C.list.length){
+      $("cruz-table").innerHTML = '<div class="empty-state"><div class="big">Nada para cruzar</div>Não há registros com esses dois campos preenchidos neste recorte.</div>';
+      $("cruz-insights").innerHTML = ""; $("cruz-hint").textContent = "";
+      return;
+    }
+    const rowTop = new Set(R.list.map(r => r.name)), colTop = new Set(C.list.map(r => r.name));
+    const labR = n => rowTop.has(n) ? n : (R.overflow.length ? "Demais" : null);
+    const labC = n => colTop.has(n) ? n : (C.overflow.length ? "Demais" : null);
+    const rowNames = R.list.map(r => r.name).concat(R.overflow.length ? ["Demais"] : []);
+    const colNames = C.list.map(r => r.name).concat(C.overflow.length ? ["Demais"] : []);
+    const cells = new Map(), rowE = new Map(), colE = new Map(), all = [];
+    cur.forEach(e => {
+      const rv = rd.get(e), cv = cd.get(e);
+      if(!rv || !cv) return;
+      const rl = labR(rv), cl = labC(cv);
+      if(rl === null || cl === null) return;
+      pushTo(cells, rl + "\u0001" + cl, e); pushTo(rowE, rl, e); pushTo(colE, cl, e); all.push(e);
+    });
+    const grand = all.length;
+    const val = (ents, base) => {
+      const a = agg(ents);
+      return m === "n" ? a.n : m === "sum" ? a.sum : m === "ticket" ? a.ticket : (base ? a.n / base * 100 : 0);
+    };
+    const fmt = v => v <= 0 ? "·" : m === "n" ? String(v) : m === "pct" ? Math.round(v) + "%" : fmtCompacto(v);
+    let max = 0;
+    const cellData = [];
+    rowNames.forEach(r => colNames.forEach(c => {
+      const ents = cells.get(r + "\u0001" + c) || [];
+      const v = val(ents, (rowE.get(r) || []).length);
+      if(v > max) max = v;
+      cellData.push({ r: r, c: c, ents: ents, v: v, a: agg(ents) });
+    }));
+    const cellOf = {};
+    cellData.forEach(x => { cellOf[x.r + "\u0001" + x.c] = x; });
+    const hdr = (d, name, tag) => name === "Demais"
+      ? '<' + tag + ' class="demais" title="Soma dos demais valores menores">Demais</' + tag + '>'
+      : '<' + tag + ' data-act="filter" data-dim="' + d.key + '" data-val="' + esc(name) + '" title="Filtrar o painel por ' + esc(name) + '">' + esc(name) + '</' + tag + '>';
+    let html = '<div class="hm-wrap"><table class="hm"><thead><tr><th class="corner">' + esc(rd.label) + ' ↓ · ' + esc(cd.label) + ' →</th>' +
+      colNames.map(c => hdr(cd, c, "th")).join("") + '<th class="tot">Total</th></tr></thead><tbody>';
+    rowNames.forEach(r => {
+      html += '<tr>' + hdr(rd, r, "th");
+      colNames.forEach(c => {
+        const x = cellOf[r + "\u0001" + c];
+        if(!x.ents.length){ html += '<td class="zero">·</td>'; return; }
+        const ref = pushRef(r + " × " + c, x.ents);
+        const alpha = max > 0 ? (0.10 + 0.62 * (x.v / max)) : 0;
+        html += '<td data-act="drill" data-ref="' + ref + '" style="background:rgba(169,195,72,' + alpha.toFixed(2) + ')" title="' +
+          esc(r + " × " + c + ": " + x.a.n + " registro(s) · " + fmtBRL(x.a.sum)) + '">' + esc(fmt(x.v)) + '</td>';
+      });
+      const re = rowE.get(r) || [];
+      html += '<td class="tot" data-act="drill" data-ref="' + pushRef(rd.label + ": " + r, re) + '">' + esc(fmt(val(re, re.length))) + '</td></tr>';
+    });
+    html += '<tr><th class="tot">Total</th>' + colNames.map(c => {
+      const ce = colE.get(c) || [];
+      return '<td class="tot" data-act="drill" data-ref="' + pushRef(cd.label + ": " + c, ce) + '">' + esc(fmt(val(ce, grand))) + '</td>';
+    }).join("") + '<td class="tot" data-act="drill" data-ref="' + pushRef("Todos os registros do cruzamento", all) + '">' + esc(fmt(val(all, grand))) + '</td></tr>';
+    html += '</tbody></table></div>';
+    $("cruz-table").innerHTML = html;
+    $("cruz-hint").textContent = "Cores mais fortes = valores maiores. Toque numa célula para ver os registros; toque num cabeçalho para filtrar o painel." +
+      ((R.overflow.length || C.overflow.length) ? " “Demais” reúne os itens menos frequentes." : "");
+
+    // leitura automática
+    const ins = [];
+    const filled = cellData.filter(x => x.ents.length);
+    const byN = filled.slice().sort((x, y) => y.a.n - x.a.n)[0];
+    if(byN) ins.push('🔥 A combinação mais forte em registros é <b>' + esc(byN.r) + ' × ' + esc(byN.c) + '</b>: ' + byN.a.n + ' (' + pct(byN.a.n, grand) + '% do total).');
+    const byS = filled.slice().sort((x, y) => y.a.sum - x.a.sum)[0];
+    if(byS && byS.a.sum > 0 && byS !== byN) ins.push('💰 A que mais fatura é <b>' + esc(byS.r) + ' × ' + esc(byS.c) + '</b>: ' + fmtBRL(byS.a.sum) + '.');
+    const byT = filled.filter(x => x.a.nv >= 2).sort((x, y) => y.a.ticket - x.a.ticket)[0];
+    if(byT) ins.push('🎯 Maior ticket médio (2+ vendas): <b>' + esc(byT.r) + ' × ' + esc(byT.c) + '</b>, ' + fmtBRL(byT.a.ticket) + '.');
+    const conc = rowNames.map(r => {
+      const re = rowE.get(r) || [];
+      const best = colNames.map(c => cellOf[r + "\u0001" + c]).sort((x, y) => y.a.n - x.a.n)[0];
+      return { r: r, n: re.length, best: best, p: re.length ? best.a.n / re.length : 0 };
+    }).filter(x => x.n >= 3 && x.r !== "Demais" && x.best.c !== "Demais" && x.p >= 0.6 && colNames.length > 1).sort((x, y) => y.p - x.p)[0];
+    if(conc) ins.push('🧲 <b>' + esc(conc.r) + '</b> concentra ' + Math.round(conc.p * 100) + '% dos seus registros em <b>' + esc(conc.best.c) + '</b>.');
+    if(rowNames.length <= 12 && colNames.length <= 8){
+      const rt = {}, ct = {};
+      rowNames.forEach(r => { rt[r] = (rowE.get(r) || []).length; });
+      colNames.forEach(c => { ct[c] = (colE.get(c) || []).length; });
+      const gaps = cellData.filter(x => !x.ents.length && x.r !== "Demais" && x.c !== "Demais")
+        .sort((x, y) => (rt[y.r] * ct[y.c]) - (rt[x.r] * ct[x.c])).slice(0, 3);
+      if(gaps.length) ins.push('🕳️ Oportunidades sem nenhum registro: ' + gaps.map(g => '<b>' + esc(g.r) + ' × ' + esc(g.c) + '</b>').join(", ") + '.');
+    }
+    $("cruz-insights").innerHTML = ins.length ? ins.map(t => '<div class="insight static"><span>' + t + '</span></div>').join("") : '<div class="empty-state" style="padding:12px 0;">Poucos dados para uma leitura automática.</div>';
+  }
+
+  // ---------- aba: vendedores ----------
+  function stackedBar(parts, total){
+    // parts: [{label, n, color, ref}]
+    return '<div class="stk">' + parts.filter(p => p.n > 0).map(p =>
+      '<span style="width:' + (p.n / total * 100).toFixed(2) + '%;background:' + p.color + '"' +
+      (p.ref != null ? ' data-act="drill" data-ref="' + p.ref + '" role="button" tabindex="0"' : "") +
+      ' title="' + esc(p.label + ": " + p.txt) + '"></span>').join("") + '</div>';
+  }
+  function renderPessoas(baseP){
+    const ents = baseP.filter(e => passa(e, "vendedor"));
+    const nomes = Array.from(new Set(VENDEDORES.concat(ents.map(e => e.vendedor).filter(Boolean))));
+    const segDim = dimOf("segmento");
+    const data = nomes.map((name, i) => {
+      const es = ents.filter(e => e.vendedor === name);
+      const sr = rows(es, segDim).sort((a, b) => b.n - a.n)[0];
+      return Object.assign({ name: name, ents: es, idx: i, foco: sr ? sr.name : "—" }, agg(es));
+    });
+    const { col, dir } = UI.vSort;
+    data.sort((a, b) => col === "name" ? dir * a.name.localeCompare(b.name) : dir * ((a[col] || 0) - (b[col] || 0)) || b.n - a.n);
+    const best = {};
+    ["n","sum","ticket","recPct","max"].forEach(k => {
+      const mx = Math.max.apply(null, data.filter(d => d.n > 0).map(d => d[k]).concat([0]));
+      best[k] = mx > 0 ? mx : null;
+    });
+    const cols = [["name","Vendedor"],["n","Registros"],["sum","Vendido"],["ticket","Ticket"],["recPct","Recorr."],["max","Maior venda"],["foco","Foco"]];
+    const seta = k => UI.vSort.col === k ? (UI.vSort.dir < 0 ? " ▼" : " ▲") : "";
+    let t = '<div class="hm-wrap"><table class="vt"><thead><tr>' + cols.map(c =>
+      c[0] === "foco" ? '<th>' + c[1] + '</th>' :
+      '<th data-act="vsort" data-col="' + c[0] + '" class="' + (UI.vSort.col === c[0] ? "sorted" : "") + '">' + c[1] + seta(c[0]) + '</th>').join("") + '</tr></thead><tbody>';
+    data.forEach(d => {
+      const sel = filtros.vendedor.has(d.name);
+      const cl = k => (best[k] !== null && d[k] === best[k] && d.n > 0) ? ' class="best"' : "";
+      t += '<tr class="' + (sel ? "sel" : "") + (d.n === 0 ? " idle" : "") + '" data-act="vend" data-name="' + esc(d.name) + '">' +
+        '<th><span>' + esc(d.name) + '</span><button type="button" class="mini" data-act="filter" data-dim="vendedor" data-val="' + esc(d.name) + '" title="' + (sel ? "Remover filtro" : "Filtrar o painel por este vendedor") + '">' + (sel ? "✓" : "⌖") + '</button></th>' +
+        '<td' + cl("n") + '>' + d.n + '</td><td' + cl("sum") + '>' + (d.sum ? fmtBRLShort(d.sum) : "—") + '</td>' +
+        '<td' + cl("ticket") + '>' + (d.nv ? fmtBRLShort(d.ticket) : "—") + '</td><td' + cl("recPct") + '>' + (d.n ? Math.round(d.recPct) + "%" : "—") + '</td>' +
+        '<td' + cl("max") + '>' + (d.max ? fmtBRLShort(d.max) : "—") + '</td><td class="foco">' + esc(d.foco) + '</td></tr>';
+    });
+    $("vend-table").innerHTML = t + '</tbody></table></div><div class="hint">Toque no título da coluna para ordenar · toque numa linha para o relatório completo do vendedor · 🏆 em verde = melhor da coluna.</div>';
+
+    // participação
+    const byId = data.slice().sort((a, b) => a.idx - b.idx);
+    const totS = byId.reduce((s, d) => s + d.sum, 0);
+    const useSum = totS > 0;
+    const tot = useSum ? totS : byId.reduce((s, d) => s + d.n, 0);
+    if(tot <= 0){
+      $("vend-share").innerHTML = '<div class="empty-state" style="padding:12px 0;">Sem dados neste recorte.</div>';
+    } else {
+      const parts = byId.map(d => ({ label: d.name, n: useSum ? d.sum : d.n, color: PALETA[d.idx % 7],
+        txt: (useSum ? fmtBRL(d.sum) : d.n + " registros") + " (" + pct(useSum ? d.sum : d.n, tot) + "%)",
+        ref: d.ents.length ? pushRef("Registros de " + d.name, d.ents) : null }));
+      $("vend-share").innerHTML = stackedBar(parts, tot) + '<div class="legend">' + byId.filter(d => (useSum ? d.sum : d.n) > 0).map(d =>
+        '<span><i style="background:' + PALETA[d.idx % 7] + '"></i>' + esc(d.name) + ' ' + pct(useSum ? d.sum : d.n, tot) + '%</span>').join("") + '</div>' +
+        '<div class="hint">' + (useSum ? "Fatia de cada vendedor no total vendido." : "Ainda sem valores — mostrando a fatia de registros.") + '</div>';
+    }
+
+    // perfil por vendedor
+    $("mix-dims").innerHTML = MIX_DIMS.map(k =>
+      '<button type="button" class="chip' + (UI.mixDim === k ? " on" : "") + '" data-act="mixdim" data-d="' + k + '">' + esc(dimOf(k).label) + '</button>').join("");
+    const md = dimOf(UI.mixDim);
+    const glob = rows(ents, md);
+    if(!glob.length){
+      $("vend-mix").innerHTML = '<div class="empty-state" style="padding:12px 0;">Sem dados neste recorte.</div>';
+      return;
+    }
+    const topNames = glob.slice().sort((a, b) => b.n - a.n).slice(0, 7).map(r => r.name);
+    const colorOf = name => { const i = topNames.indexOf(name); return PALETA[i >= 0 ? i : 7]; };
+    let mix = "";
+    byId.filter(d => d.n > 0).forEach(d => {
+      const rs = rows(d.ents, md);
+      const parts = topNames.map(nm => rs.find(r => r.name === nm)).filter(Boolean).map(r => ({
+        label: r.name, n: r.n, color: colorOf(r.name), txt: r.n + " (" + pct(r.n, d.n) + "%)",
+        ref: pushRef(d.name + " · " + r.name, r.ents) }));
+      const semInfo = d.ents.filter(e => !md.get(e));
+      const resto = rs.filter(r => topNames.indexOf(r.name) < 0);
+      if(resto.length){
+        const re = [].concat.apply([], resto.map(r => r.ents));
+        parts.push({ label: "Demais", n: re.length, color: PALETA[7], txt: re.length + " (" + pct(re.length, d.n) + "%)", ref: pushRef(d.name + " · demais", re) });
+      }
+      if(semInfo.length){
+        parts.push({ label: "Sem informação", n: semInfo.length, color: "#DAD6CA", txt: semInfo.length + " (" + pct(semInfo.length, d.n) + "%)", ref: pushRef(d.name + " · sem " + md.label.toLowerCase(), semInfo) });
+      }
+      mix += '<div class="mixrow"><div class="mixhead"><b>' + esc(d.name) + '</b><span>' + d.n + (d.n === 1 ? " registro" : " registros") + (d.sum ? " · " + fmtBRLShort(d.sum) : "") + '</span></div>' + stackedBar(parts, d.n) + '</div>';
+    });
+    mix += '<div class="legend">' + topNames.map(nm => '<span><i style="background:' + colorOf(nm) + '"></i>' + esc(nm) + '</span>').join("") +
+      (glob.length > topNames.length ? '<span><i style="background:' + PALETA[7] + '"></i>Demais</span>' : "") +
+      (byId.some(d => d.ents.some(e => !md.get(e))) ? '<span><i style="background:#DAD6CA"></i>Sem informação</span>' : "") + '</div>' +
+      '<div class="hint">Cada barra soma 100% dos registros do vendedor. Toque num trecho para ver os registros.</div>';
+    $("vend-mix").innerHTML = mix;
+  }
+
+  // ---------- aba: registros ----------
+  function renderRegistros(cur){
+    const q = semAcento(UI.recQ.trim());
+    let list = cur.slice();
+    if(q){
+      list = list.filter(e => semAcento([e.vendedor, e.cidade, e.estado, e.segmento, e.origem, e.produto, e.tipo, e.pedido, e.faixa, e.valor, fmtDataBR(e.data)].join(" ")).indexOf(q) >= 0);
+    }
+    const vv = e => { const v = vOf(e); return v === null ? 0 : v; };
+    if(UI.recSort === "maior") list.sort((a, b) => vv(b) - vv(a) || b.ts - a.ts);
+    else if(UI.recSort === "menor") list.sort((a, b) => (vv(a) || Infinity) - (vv(b) || Infinity) || b.ts - a.ts);
+    else list.sort((a, b) => b.ts - a.ts);
+    LAST.recList = list;
+    document.querySelectorAll("#rec-sort button").forEach(b => b.classList.toggle("on", b.dataset.s === UI.recSort));
+    if($("rec-q").value !== UI.recQ) $("rec-q").value = UI.recQ;
+    const a = agg(list);
+    $("rec-count").textContent = list.length + (list.length === 1 ? " registro" : " registros") + " · " + fmtBRL(a.sum) + " vendidos";
+    const box = $("rec-list");
+    if(!list.length){
+      box.innerHTML = '<div class="empty-state"><div class="big">Nada encontrado</div>Ajuste a busca, o período ou os filtros.</div>';
+    } else {
+      box.innerHTML = list.slice(0, UI.recLimit).map(e => {
+        const ref = pushRef("Venda", [e]);
+        const v = vOf(e);
+        return '<div class="rec" data-act="sale" data-ref="' + ref + '" role="button" tabindex="0">' +
+          '<div class="l"><div class="who">' + esc(e.vendedor) + ' · ' + esc(e.cidade) + (e.estado ? "/" + esc(e.estado) : "") + '</div>' +
+          '<div class="meta">' + esc([e.segmento, e.origem, e.produto].filter(Boolean).join(" · ")) + '</div>' +
+          '<div class="meta">' + esc(fmtDataBR(e.data)) + (e.pedido ? " · Pedido " + esc(e.pedido) : "") + ' · ' + esc(e.tipo) + '</div></div>' +
+          '<div class="r"><div class="amt">' + (v !== null ? fmtBRLShort(v) : "—") + '</div>' + (e.faixa ? '<div class="tag">' + esc(e.faixa) + '</div>' : "") + '</div></div>';
+      }).join("");
+    }
+    const resto = list.length - UI.recLimit;
+    $("rec-more").style.display = resto > 0 ? "block" : "none";
+    $("rec-more").textContent = "Ver mais " + Math.min(20, Math.max(resto, 0)) + " (restam " + Math.max(resto, 0) + ")";
+    $("rec-csv").style.display = list.length ? "block" : "none";
+  }
+
+  // ---------- detalhamento (recorte clicado) ----------
+  let drillEntries = [], drillTitle = "";
+  function openDrill(title, ents){
+    drillEntries = ents.slice();
+    drillTitle = title;
+    $("drill-title").textContent = title;
+    const a = agg(ents);
+    $("drill-kpis").innerHTML =
+      '<div class="mk"><span>Registros</span><b>' + a.n + '</b></div>' +
+      '<div class="mk"><span>Vendido</span><b>' + esc(fmtBRLShort(a.sum)) + '</b></div>' +
+      '<div class="mk"><span>Ticket</span><b>' + (a.nv ? esc(fmtBRLShort(a.ticket)) : "—") + '</b></div>';
+    const box = $("drill-list");
+    box.innerHTML = "";
+    const sorted = ents.slice().sort((x, y) => y.ts - x.ts);
+    sorted.slice(0, 60).forEach(e => {
+      const v = vOf(e);
+      const row = document.createElement("div");
+      row.className = "recent-item";
+      row.innerHTML = '<div><div class="who">' + esc(e.vendedor) + ' — ' + esc(e.cidade) + '</div>' +
+        '<div class="meta">' + esc(fmtDataBR(e.data)) + ' · ' + esc([e.segmento, e.origem].filter(Boolean).join(" · ")) + '</div></div>' +
+        '<div class="amt">' + (v !== null ? esc(fmtBRLShort(v)) : "—") + '</div>';
+      row.addEventListener("click", () => openSaleDetail(e));
+      box.appendChild(row);
+    });
+    if(sorted.length > 60){
+      const h = document.createElement("div");
+      h.className = "hint";
+      h.style.marginTop = "8px";
+      h.textContent = "Mostrando 60 de " + sorted.length + ". Baixe o CSV para ver todos.";
+      box.appendChild(h);
+    }
+    $("drill-overlay").classList.add("show");
+  }
+  $("btn-drill-close").addEventListener("click", () => $("drill-overlay").classList.remove("show"));
+  $("drill-overlay").addEventListener("click", e => { if(e.target.id === "drill-overlay") $("drill-overlay").classList.remove("show"); });
+  $("btn-drill-csv").addEventListener("click", () => {
+    if(!drillEntries.length) return;
+    const slug = drillTitle.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    downloadCSV(entriesToCSV(drillEntries.slice().sort((a, b) => a.ts - b.ts)), "recorte-" + (slug || "registros") + "-" + todayIsoCompact() + ".csv");
+  });
+  document.addEventListener("keydown", ev => {
+    if(ev.key !== "Escape") return;
+    ["sale-detail-overlay", "vendor-detail-overlay", "segmento-detail-overlay", "drill-overlay"].some(id => {
+      const el = $(id);
+      if(el && el.classList.contains("show")){ el.classList.remove("show"); return true; }
+      return false;
+    });
+  });
+
+  // ---------- orquestração ----------
+  function renderDashboard(){
+    const baseP = filtrarPorPeriodo(DASH.all, periodoSelecionado);
+    const cur = baseP.filter(e => passa(e));
+    const j = janelaAnterior(periodoSelecionado);
+    const prev = DASH.all.filter(e => e.ts >= j.pIni && e.ts < j.pFim && passa(e));
+    LAST.refs = [];
+    renderFilterBar(baseP);
+    renderKPIs(cur, prev);
+    document.querySelectorAll("#dash-tabs button").forEach(b => {
+      const on = b.dataset.dtab === UI.tab;
+      b.classList.toggle("selected", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.querySelectorAll(".dtab").forEach(s => s.classList.toggle("active", s.id === "dtab-" + UI.tab));
+    if(UI.tab === "geral") renderGeral(baseP, cur, prev);
+    else if(UI.tab === "cruz") renderCruz(cur);
+    else if(UI.tab === "pessoas") renderPessoas(baseP);
+    else renderRegistros(cur);
+  }
+
+  function onDashClick(ev){
+    const t = ev.target.closest("[data-act]");
+    if(!t || !$("dash-content").contains(t)) return;
+    const d = t.dataset;
+    switch(d.act){
+      case "filter": toggleFiltro(d.dim, d.val); break;
+      case "drill": { const r = LAST.refs[Number(d.ref)]; if(r) openDrill(r.title, r.ents); break; }
+      case "sale": { const r = LAST.refs[Number(d.ref)]; if(r && r.ents[0]) openSaleDetail(r.ents[0]); break; }
+      case "metric": UI.metric[d.dim] = d.m; renderDashboard(); break;
+      case "expand": UI.expand[d.dim] = !UI.expand[d.dim]; renderDashboard(); break;
+      case "kpi": onKpi(d.k); break;
+      case "tab": setTab(d.dtab, false); break;
+      case "trend": UI.trendMetric = d.m; renderDashboard(); break;
+      case "preset": UI.cruz.row = d.r; UI.cruz.col = d.c; renderDashboard(); break;
+      case "cmetric": UI.cruz.metric = d.m; renderDashboard(); break;
+      case "cswap": { const x = UI.cruz.row; UI.cruz.row = UI.cruz.col; UI.cruz.col = x; renderDashboard(); break; }
+      case "vsort":
+        if(UI.vSort.col === d.col) UI.vSort.dir = -UI.vSort.dir;
+        else UI.vSort = { col: d.col, dir: d.col === "name" ? 1 : -1 };
+        renderDashboard(); break;
+      case "vend": {
+        const baseP = filtrarPorPeriodo(DASH.all, periodoSelecionado);
+        openVendorDetail(d.name, baseP.filter(e => passa(e, "vendedor")));
+        break;
+      }
+      case "mixdim": UI.mixDim = d.d; renderDashboard(); break;
+      case "rsort": UI.recSort = d.s; UI.recLimit = 20; renderDashboard(); break;
+      case "toggle-filters": UI.showFilters = !UI.showFilters; renderDashboard(); break;
+      case "clear": limparFiltros(); break;
+    }
+  }
+  $("dash-content").addEventListener("click", onDashClick);
+  $("dash-content").addEventListener("keydown", ev => {
+    if((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('[role="button"]')){
+      ev.preventDefault();
+      ev.target.click();
+    }
+  });
+  (function iniciarControles(){
+    const opts = DIMS.map(d => '<option value="' + d.key + '">' + esc(d.label) + '</option>').join("");
+    $("cruz-row").innerHTML = opts;
+    $("cruz-col").innerHTML = opts;
+    $("cruz-row").value = UI.cruz.row;
+    $("cruz-col").value = UI.cruz.col;
+    $("cruz-row").addEventListener("change", e => { UI.cruz.row = e.target.value; renderDashboard(); });
+    $("cruz-col").addEventListener("change", e => { UI.cruz.col = e.target.value; renderDashboard(); });
+    $("rec-q").addEventListener("input", e => { UI.recQ = e.target.value; UI.recLimit = 20; renderDashboard(); });
+    $("rec-more").addEventListener("click", () => { UI.recLimit += 20; renderDashboard(); });
+    $("rec-csv").addEventListener("click", () => {
+      if(!LAST.recList.length) return;
+      downloadCSV(entriesToCSV(LAST.recList.slice().sort((a, b) => a.ts - b.ts)), "registros-filtrados-" + todayIsoCompact() + ".csv");
+    });
+  })();
+
+  async function loadDashboard(){
+    $("dash-loading").style.display = "block";
+    $("dash-content").style.display = "none";
+
+    const db = await loadDB();
+    DASH.all = db.entries;
+    DASH.loaded = true;
+    renderDashboard();
+
+    $("dash-loading").style.display = "none";
+    $("dash-content").style.display = "block";
+    const agora = new Date();
+    $("dash-updated").textContent = "Atualizado às " + String(agora.getHours()).padStart(2, "0") + ":" + String(agora.getMinutes()).padStart(2, "0");
+    $("export-count").textContent = DASH.all.length
+      ? DASH.all.length + " registros armazenados (todo o histórico), prontos para exportar."
+      : "Nenhum registro para exportar ainda.";
+
+    // aviso de configuração pendente (Apps Script ainda não foi configurado)
+    const capacityEl = $("alert-capacity");
+    if(db.erro){
+      capacityEl.style.display = "block";
+      capacityEl.textContent = "⚠️ Não foi possível carregar os dados da planilha agora (internet ou Apps Script). Os números abaixo podem estar incompletos — toque em “Atualizar painel” para tentar de novo.";
+    } else if(!isConfigured()){
+      capacityEl.style.display = "block";
+      capacityEl.textContent = "⚙️ A planilha ainda não foi conectada (veja o guia de configuração). Por enquanto, nenhum registro está sendo salvo de verdade.";
+    } else {
+      capacityEl.style.display = "none";
+    }
+
+    // alerta de exportação semanal aos domingos
+    $("alert-weekly").style.display = (new Date().getDay() === 0) ? "block" : "none";
+  }
+
+  function csvEscape(v){
+    const s = (v===undefined || v===null) ? "" : String(v);
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  const CSV_HEADERS = ["Vendedor","Data","Pedido","Cidade","Estado","Tipo de cliente","Segmento","Origem","Produto de interesse","Valor da venda","Faixa da venda","Registrado em"];
+  function entryToRow(e){
+    return [
+      e.vendedor, e.data, e.pedido, e.cidade, e.estado, e.tipo, e.segmento, e.origem, e.produto, e.valor, e.faixa,
+      new Date(e.ts).toLocaleString("pt-BR")
+    ];
+  }
+  function entriesToCSV(entries){
+    let csv = "\uFEFF" + CSV_HEADERS.map(csvEscape).join(";") + "\r\n";
+    entries.forEach(e => { csv += entryToRow(e).map(csvEscape).join(";") + "\r\n"; });
+    return csv;
+  }
+  function downloadCSV(csv, filename){
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function todayIsoCompact(){
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+
+  async function exportToCSV(){
+    const btn = $("btn-export");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Gerando arquivo...";
+
+    const db = await loadDB();
+    const entries = db.entries.slice().reverse();
+
+    downloadCSV(entriesToCSV(entries), "registros-cdbh-" + todayIsoCompact() + ".csv");
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+  $("btn-export").addEventListener("click", exportToCSV);
+
+})();
+</script>
+</body>
+</html>
